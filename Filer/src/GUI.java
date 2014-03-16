@@ -54,6 +54,11 @@ public class GUI implements ActionListener, KeyListener
 		//test/
 		//test
 		//f
+		//Nick
+		//Does 
+		//It
+		//Work
+		//?
 		if (aboutFrame == null)
 		{
 			
