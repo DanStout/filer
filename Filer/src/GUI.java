@@ -35,7 +35,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class GUI implements ActionListener, KeyListener
 {
-	//this class implements the action listener and keylistener classes
+	//this class implements the action listener and key listener classes
 	//declarations
 	JFrame frame, aboutFrame;
 	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, syncItem, exitItem;
@@ -94,9 +94,12 @@ public class GUI implements ActionListener, KeyListener
 		}
 
 		// statusBar
+		//adding GUI elements
 		statusBar = new JPanel();
 		statusBar.setLayout(new BoxLayout(statusBar, BoxLayout.LINE_AXIS));
+		//line axis is a horizontal layout
 		statusBar.setPreferredSize(new Dimension(frame.getWidth(), 20));
+		//as wide as the frame, and 20 pixels tall
 		statusLabel = new JLabel("Status: Idle");
 		wordCountLabel = new JLabel("Words: 0");
 		statusBar.add(Box.createHorizontalStrut(10));
@@ -105,6 +108,7 @@ public class GUI implements ActionListener, KeyListener
 		statusBar.add(new JLabel("|"));
 		statusBar.add(Box.createHorizontalStrut(10));
 		statusBar.add(wordCountLabel);
+		//populate the status bar
 
 		frame.add(statusBar, BorderLayout.SOUTH);
 
