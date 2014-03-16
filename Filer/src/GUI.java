@@ -136,7 +136,8 @@ public class GUI implements ActionListener, KeyListener
 		newItem = new JMenuItem("New");
 		newItem.addActionListener(this);
 		newItem.setAccelerator(KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
-
+		
+		//HEllo this isnt a useful comment
 		openItem = new JMenuItem("Open");
 		openItem.addActionListener(this);
 		openItem.setAccelerator(KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
