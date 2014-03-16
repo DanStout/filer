@@ -90,7 +90,7 @@ public class GUI implements ActionListener, KeyListener
 		}
 		catch (Exception e)
 		{
-			// 
+			// outputs errors if any occur
 			e.printStackTrace();
 		}
 
