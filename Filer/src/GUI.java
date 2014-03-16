@@ -76,16 +76,21 @@ public class GUI implements ActionListener, KeyListener
 	}
 
 	public GUI()
+	//constructor
 	{
 		frame = new JFrame();
+		//creates a new j frame
 		timer = new Timer();
+		//timer for use in the idle state display
 
 		try
 		{
+			//makes the window look like the native systems windows
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
 		catch (Exception e)
 		{
+			// 
 			e.printStackTrace();
 		}
 
