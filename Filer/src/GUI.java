@@ -59,6 +59,7 @@ public class GUI implements ActionListener, KeyListener
 		//It
 		//Work
 		//?
+		//IN THE TOWN, WHERE I WAS BORN, LIVED A MAN THAT SAILED THE SEA  AND HE TOLD US OF HIS LIFE.  IN THE LAND OF SUBMARINES
 		if (aboutFrame == null)
 		{
 			
