@@ -48,8 +48,10 @@ public class GUI implements ActionListener, KeyListener
 
 	public void aboutFrame()
 	{
+		//dhsfghfdgh
 		if (aboutFrame == null)
 		{
+			
 			aboutFrame = new JFrame("About Filer");
 			aboutFrame.setLocationRelativeTo(frame);
 			aboutFrame.setSize(300, 200);
