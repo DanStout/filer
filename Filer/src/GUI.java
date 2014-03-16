@@ -33,7 +33,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-//HELLO PEOPLE
+//HELLO PEOPLE lABSfjf aF Wnf ewbfewbF EWFMEW EWfjejf 
 public class GUI implements ActionListener, KeyListener
 {
 	//this class implements the action listener and keylistener classes
