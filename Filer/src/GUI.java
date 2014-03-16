@@ -112,20 +112,27 @@ public class GUI implements ActionListener, KeyListener
 		//populate the status bar
 
 		frame.add(statusBar, BorderLayout.SOUTH);
+		//adds the status bar to the frame on the south side (bottom)
 
 		// textPane
+		//create text pane
 		textPane = new JTextPane();
+		//add key listener that will allow user to type onto the textpane 
 		textPane.addKeyListener(this);
+		//set font
 		Font font = new Font("Arial", 10, 16);
 		textPane.setFont(font);
+		//create scroll pane and put the text pane into it
 		JScrollPane scrollPane = new JScrollPane(textPane);
 		frame.add(scrollPane);
 
+		//create menu bar
 		JMenuBar menuBar = new JMenuBar();
 
 		// fileMenu
 		JMenu fileMenu = new JMenu("File");
-
+		
+		//populate menu bar item "File"
 		newItem = new JMenuItem("New");
 		newItem.addActionListener(this);
 		newItem.setAccelerator(KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
@@ -145,7 +152,8 @@ public class GUI implements ActionListener, KeyListener
 		exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(this);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
-
+		
+		//add populations to the menu
 		fileMenu.add(newItem);
 		fileMenu.add(openItem);
 		fileMenu.addSeparator();
@@ -156,7 +164,8 @@ public class GUI implements ActionListener, KeyListener
 
 		// editMenu
 		JMenu editMenu = new JMenu("Edit");
-
+		
+		//populate menu button "edit"
 		undoItem = new JMenuItem("Undo");
 		undoItem.setAccelerator(KeyStroke.getKeyStroke('Z', KeyEvent.CTRL_DOWN_MASK));
 
@@ -167,11 +176,13 @@ public class GUI implements ActionListener, KeyListener
 		editMenu.add(redoItem);
 
 		// networkMenu
+		//populate network button
 		JMenu networkMenu = new JMenu("Network");
 		syncItem = new JMenuItem("Sync");
 		networkMenu.add(syncItem);
 
 		// helpMenu
+		//populate help menu
 		JMenu helpMenu = new JMenu("Help");
 		aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(this);
