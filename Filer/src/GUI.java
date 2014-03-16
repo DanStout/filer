@@ -49,6 +49,10 @@ public class GUI implements ActionListener, KeyListener
 	public void aboutFrame()
 	{
 		//dhsfghfdgh
+		//test
+		//test
+		//test/
+		//test
 		if (aboutFrame == null)
 		{
 			
