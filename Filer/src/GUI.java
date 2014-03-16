@@ -50,6 +50,7 @@ public class GUI implements ActionListener, KeyListener
 	{
 		if (aboutFrame == null)
 		{
+			//dvdjndjnb
 			aboutFrame = new JFrame("About Filer");
 			aboutFrame.setLocationRelativeTo(frame);
 			aboutFrame.setSize(300, 200);
