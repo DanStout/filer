@@ -51,18 +51,7 @@ public class GUI implements ActionListener, KeyListener
 
 	public void aboutFrame()
 	{
-		//dhsfghfdgh
-		//test
-		//test
-		//test/
-		//test
-		//f
-		//Nick
-		//Does 
-		//It
-		//Work
-		//?
-		//IN THE TOWN, WHERE I WAS BORN, LIVED A MAN THAT SAILED THE SEA  AND HE TOLD US OF HIS LIFE.  IN THE LAND OF SUBMARINES
+
 		if (aboutFrame == null)
 		{
 			
@@ -137,7 +126,6 @@ public class GUI implements ActionListener, KeyListener
 		newItem.addActionListener(this);
 		newItem.setAccelerator(KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
 		
-		//HEllo this isnt a useful comment
 		openItem = new JMenuItem("Open");
 		openItem.addActionListener(this);
 		openItem.setAccelerator(KeyStroke.getKeyStroke('O', KeyEvent.CTRL_DOWN_MASK));
@@ -197,31 +185,43 @@ public class GUI implements ActionListener, KeyListener
 
 		frame.addWindowListener(new WindowAdapter()
 		{
+			//sets up the system reponce to the exit button being pressed
 			public void windowClosing(WindowEvent we)
 			{
+				//this will check if the current entries in the text area has been saved, if not it will bring up the save window
+				//(save, no save, cancel)
+				//will return true if saved, a save is made or the user selects not to save
+				//return false if user presses cancel
 				if (saveCheck()) System.exit(0);
 			}
 		});
-
+		
+		
+		//WHAT? daniel please comment, is this just prep for the file chooser to be called? 
 		fileChooser = new JFileChooser();
 		FileNameExtensionFilter txtFilter = new FileNameExtensionFilter("TXT files", "txt");
 		FileNameExtensionFilter javaFilter = new FileNameExtensionFilter("JAVA files", "java");
 		fileChooser.addChoosableFileFilter(txtFilter);
 		fileChooser.addChoosableFileFilter(javaFilter);
 
+		//sets the frame size and starting title, center location,
+		//and declares that the "x" button will do nothing initially
 		frame.setTitle("Filer - Untitled.txt");
 		frame.setSize(800, 600);
 		frame.setLocationRelativeTo(null);
 		frame.setJMenuBar(menuBar);
 		frame.setDefaultCloseOperation(frame.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
+		
 	}
-
+	
+	//this method is used to update the status label on the lower status bar
 	private void updateStatus(String s)
 	{
 		statusLabel.setText("Status: " + s);
 	}
-
+	
+	//when the timer expires the idle command is set to idle
 	public class Task extends TimerTask
 	{
 		public void run()
@@ -230,6 +230,7 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
+	//this is the method called to start the idle timer for 10 seconds, (10000 miliseconds)
 	private void startTimer()
 	{
 		timer.scheduleAtFixedRate(new Task(), 0, 10_000);
@@ -240,30 +241,40 @@ public class GUI implements ActionListener, KeyListener
 	public boolean saveCheck()
 	{
 		boolean isDone = true;
-
+		//issaved boolean is updated through out the program 
 		if (!isSaved)
 		{
+			//dialouge box appears to prompt user
 			int choiceVal = JOptionPane.showConfirmDialog(frame, "Would you like to save?");
 			if (choiceVal == JOptionPane.YES_OPTION)
 			{
+				//user chooses to save
 				if (!saveFile()) isDone = false;
 			}
+			//user chooses cancel
 			else if (choiceVal == JOptionPane.CANCEL_OPTION) isDone = false;
 		}
+		//if the user chooses no the method returns that the data is saved (true)
 		return isDone;
 	}
-
+	
+	//reactions to button presses by the user
 	public void actionPerformed(ActionEvent e)
 	{
+		//open file button
 		if (e.getSource() == openItem)
 		{
+			//change status
 			updateStatus("Opening file");
+			//opens the file chooser
 			int returnVal = fileChooser.showOpenDialog(fileChooser);
 
 			if (returnVal == fileChooser.APPROVE_OPTION)
 			{
+				//returns the file to be opened
 				openedFile = fileChooser.getSelectedFile();
 
+				//attempt to read file
 				try
 				{
 					readFile(openedFile);
@@ -274,6 +285,7 @@ public class GUI implements ActionListener, KeyListener
 				}
 			}
 		}
+		//remaining buttons call connected methods
 		else if (e.getSource() == saveAsItem)
 		{
 			saveFileAs();
@@ -297,6 +309,7 @@ public class GUI implements ActionListener, KeyListener
 
 	}
 
+	//original state of program at new file
 	private void newFile()
 	{
 		if (saveCheck())
@@ -307,13 +320,16 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
+	//saving file method
 	private boolean saveFile()
 	{
 		updateStatus("Saving File");
 
+		//if the file has not been saved before call the SaveFileAs method
 		if (openedFile == null) return saveFileAs();
 		else
 		{
+			//if it is an existing file then the file is simply written to the drive
 			writeFile(openedFile);
 			return true;
 		}
@@ -325,21 +341,27 @@ public class GUI implements ActionListener, KeyListener
 		updateStatus("Saving File");
 
 		int returnVal = fileChooser.showSaveDialog(fileChooser);
+		//opens window
 		if (returnVal == fileChooser.APPROVE_OPTION)
+			//user chooses to save item
 		{
 			writeFile(fileChooser.getSelectedFile());
 			return true;
 		}
-		else if (returnVal == fileChooser.CANCEL_OPTION) return false;
+		else if (returnVal == fileChooser.CANCEL_OPTION) return false; // cancel option
 		return true;
 
 	}
 
+	//read text from file at print to the text area
 	private void readFile(File file) throws Exception
 	{
+		//creates string
 		String contents = "";
+		//creates buffered reader
 		BufferedReader inputStream = null;
 
+		//attempts to read line into the string
 		try
 		{
 			inputStream = new BufferedReader(new FileReader(file));
@@ -353,16 +375,19 @@ public class GUI implements ActionListener, KeyListener
 			updateStatus(file.getName() + " opened sucessfully");
 			frame.setTitle("Filer - " + file.getName());
 		}
+		//prints error
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		//close stream
 		finally
 		{
 			if (inputStream != null) inputStream.close();
 		}
 	}
 
+	//write to existing file
 	private void writeFile(File file)
 	{
 		try
@@ -373,13 +398,16 @@ public class GUI implements ActionListener, KeyListener
 			Matcher m = p.matcher(file.getPath());
 			m.find();
 
+			//get the .***
 			String descrip = fileChooser.getFileFilter().getDescription().substring(0, 3);
 			String extension = "";
 			if (descrip.equals("TXT")) extension = ".txt";
 			else if (descrip.equals("JAV")) extension = ".java";
 
+			//file name
 			file = new File(m.group(0) + extension);
 
+			//outputs test pane contents to the output stream
 			PrintWriter outputStream = new PrintWriter(new FileWriter(file));
 			outputStream.print(textPane.getText());
 			outputStream.close();
@@ -393,16 +421,19 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
+	//word count updater
 	private void updateWordLabel()
 	{
 		wordCountLabel.setText("Words: " + findWordCount());
 	}
 
+	//word count
 	private int findWordCount()
 	{
 		return textPane.getText().split("\\s+").length;
 	}
 
+	//detects if the user is typing
 	public void keyPressed(KeyEvent e)
 	{
 		updateStatus("Typing");
@@ -412,12 +443,14 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
+	//when key released, start idle timer
 	public void keyReleased(KeyEvent e)
 	{
 		isSaved = false;
 		startTimer();
 	}
 
+	//method implement
 	public void keyTyped(KeyEvent e)
 	{
 
