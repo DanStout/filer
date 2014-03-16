@@ -36,6 +36,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 //HELLO PEOPLE
 public class GUI implements ActionListener, KeyListener
 {
+	//this class implements the action listener and keylistener classes
+	//declarations
 	JFrame frame, aboutFrame;
 	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, syncItem, exitItem;
 	JTextPane textPane;
