@@ -43,9 +43,9 @@ public class GUI implements ActionListener, KeyListener
 	JFileChooser fileChooser;
 	File openedFile;
 	JPanel statusBar;
-	String status = "Idle", oldStatus = "";
+	String status = "Idle";
 	JLabel statusLabel, wordCountLabel;
-	boolean isSaved = true, timerRunning;
+	boolean isSaved = true, isTimerRunning = false;
 	Timer timer;
 
 	public void aboutFrame()
@@ -68,8 +68,6 @@ public class GUI implements ActionListener, KeyListener
 	{
 		frame = new JFrame();
 		// creates a new JFrame
-		timer = new Timer();
-		// timer for use in the idle state display
 
 		try
 		{
@@ -202,8 +200,7 @@ public class GUI implements ActionListener, KeyListener
 		fileChooser.addChoosableFileFilter(txtFilter);
 		fileChooser.addChoosableFileFilter(javaFilter);
 
-		// sets the frame size and starting title, center location,
-		// and declares that the "x" button will do nothing initially
+		// sets the frame title, size, location, menubar, and declares that the "x" button will do nothing initially (as there needs to be a check on close as to whether the document has been saved)
 		frame.setTitle("Filer - Untitled.txt");
 		frame.setSize(800, 600);
 		frame.setLocationRelativeTo(null);
@@ -211,9 +208,12 @@ public class GUI implements ActionListener, KeyListener
 		frame.setDefaultCloseOperation(frame.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
 
+		timer = new Timer();
+		// timer for use in the idle state display
+
 	}
 
-	// this method is used to update the status label on the lower status bar
+	// this method is used to update the status label on the status bar
 	private void updateStatus(String s)
 	{
 		statusLabel.setText("Status: " + s);
@@ -225,14 +225,24 @@ public class GUI implements ActionListener, KeyListener
 		public void run()
 		{
 			updateStatus("Idle");
+			timer.cancel();
 		}
 	}
 
-	// this is the method called to start the idle timer for 10 seconds, (10000 miliseconds)
+	// start the timer to repeat the task after a specified number of milliseconds
 	private void startTimer()
 	{
-		timer.scheduleAtFixedRate(new Task(), 0, 10_000);
-		timerRunning = true;
+		try
+		{
+			timer.cancel();
+		}
+		catch (Exception ex)
+		{
+
+		}
+		timer = new Timer();
+		timer.scheduleAtFixedRate(new Task(), 1_000, 1_000);
+		isTimerRunning = true;
 	}
 
 	// returns true if you should continue (closing or making a new document), false if the user wants to cancel the action
@@ -310,6 +320,7 @@ public class GUI implements ActionListener, KeyListener
 	// creates a new file
 	private void newFile()
 	{
+		updateStatus("Attempting to create new file");
 		if (saveCheck())
 		{
 			textPane.setText("");
@@ -323,7 +334,7 @@ public class GUI implements ActionListener, KeyListener
 	{
 		updateStatus("Saving File");
 
-		// if the file has not been saved before call the SaveFileAs method
+		// if there is no opened file, call the SaveFileAs method
 		if (openedFile == null) return saveFileAs();
 		else
 		{
@@ -390,20 +401,24 @@ public class GUI implements ActionListener, KeyListener
 	{
 		try
 		{
-
-			// dealing with saving with extensions
-			Pattern p = Pattern.compile("[^.]*");
-			Matcher m = p.matcher(file.getPath());
-			m.find();
-
-			// get the .***
+			// get the extension of the chosen file filter
 			String descrip = fileChooser.getFileFilter().getDescription().substring(0, 3);
-			String extension = "";
-			if (descrip.equals("TXT")) extension = ".txt";
-			else if (descrip.equals("JAV")) extension = ".java";
 
-			// new file name with selected extension applied
-			file = new File(m.group(0) + extension);
+			// if the user has selected a type for the file, ignore any extensions they may have typed
+			if (!descrip.equals("All"))
+			{
+				String extension = "";
+				if (descrip.equals("TXT")) extension = ".txt";
+				else if (descrip.equals("JAV")) extension = ".java";
+
+				// get the path that precedes the extension
+				Pattern p = Pattern.compile("[^.]*");
+				Matcher m = p.matcher(file.getPath());
+				m.find();
+
+				// new file name with selected extension applied
+				file = new File(m.group(0) + extension);
+			}
 
 			// outputs textPane contents to the file
 			PrintWriter outputStream = new PrintWriter(new FileWriter(file));
@@ -415,7 +430,7 @@ public class GUI implements ActionListener, KeyListener
 		}
 		catch (Exception ex)
 		{
-
+			ex.printStackTrace();
 		}
 	}
 
@@ -434,7 +449,6 @@ public class GUI implements ActionListener, KeyListener
 	// detects if the user is typing
 	public void keyPressed(KeyEvent e)
 	{
-		updateStatus("Typing");
 
 		// update the wordCountLabel when space is pressed (new word)
 		if (e.getKeyCode() == KeyEvent.VK_SPACE)
@@ -447,6 +461,7 @@ public class GUI implements ActionListener, KeyListener
 	public void keyReleased(KeyEvent e)
 	{
 		isSaved = false;
+		updateStatus("Typing");
 		startTimer();
 	}
 
