@@ -45,20 +45,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @version Mar 17, 2014
  * 
  */
-/**
- * Class Description
- * 
- * @author Daniel Stout
- * @version Mar 17, 2014
- * 
- */
-/**
- * Class Description
- * 
- * @author Daniel Stout
- * @version Mar 17, 2014
- * 
- */
 public class GUI implements ActionListener, KeyListener
 {
 	// declarations
