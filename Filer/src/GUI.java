@@ -33,7 +33,32 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-//this class implements the action listener and key listener classes
+/**
+ * Create the GUI, and handle events
+ * 
+ * @author Nick Brooks
+ * @author George Faraj
+ * @author Andy Kenney
+ * @author George Sousa
+ * @author Daniel Stout
+ * 
+ * @version Mar 17, 2014
+ * 
+ */
+/**
+ * Class Description
+ * 
+ * @author Daniel Stout
+ * @version Mar 17, 2014
+ * 
+ */
+/**
+ * Class Description
+ * 
+ * @author Daniel Stout
+ * @version Mar 17, 2014
+ * 
+ */
 public class GUI implements ActionListener, KeyListener
 {
 	// declarations
@@ -45,15 +70,16 @@ public class GUI implements ActionListener, KeyListener
 	JPanel statusBar;
 	String status = "Idle";
 	JLabel statusLabel, wordCountLabel;
-	boolean isSaved = true, isTimerRunning = false;
+	boolean isSaved = true;
 	Timer timer;
 
+	/**
+	 * Initialize the aboutFrame JFrame
+	 */
 	public void aboutFrame()
 	{
-
 		if (aboutFrame == null)
 		{
-
 			aboutFrame = new JFrame("About Filer");
 			aboutFrame.setLocationRelativeTo(frame);
 			aboutFrame.setSize(300, 200);
@@ -63,11 +89,13 @@ public class GUI implements ActionListener, KeyListener
 		else aboutFrame.toFront();
 	}
 
+	/**
+	 * Initialize the frame JFrame
+	 */
 	public GUI()
-	// constructor
 	{
-		frame = new JFrame();
 		// creates a new JFrame
+		frame = new JFrame();
 
 		try
 		{
@@ -81,29 +109,28 @@ public class GUI implements ActionListener, KeyListener
 		}
 
 		// statusBar
-		// adding GUI elements
 		statusBar = new JPanel();
-		statusBar.setLayout(new BoxLayout(statusBar, BoxLayout.LINE_AXIS));
 		// line axis is a horizontal layout
-		statusBar.setPreferredSize(new Dimension(frame.getWidth(), 20));
+		statusBar.setLayout(new BoxLayout(statusBar, BoxLayout.LINE_AXIS));
 		// as wide as the frame, and 20 pixels tall
+		statusBar.setPreferredSize(new Dimension(frame.getWidth(), 20));
 		statusLabel = new JLabel("Status: Idle");
 		wordCountLabel = new JLabel("Words: 0");
+
+		// populate the status bar
 		statusBar.add(Box.createHorizontalStrut(10));
 		statusBar.add(statusLabel);
 		statusBar.add(Box.createHorizontalStrut(10));
 		statusBar.add(new JLabel("|"));
 		statusBar.add(Box.createHorizontalStrut(10));
 		statusBar.add(wordCountLabel);
-		// populate the status bar
 
-		frame.add(statusBar, BorderLayout.SOUTH);
 		// adds the status bar to the frame on the south side (bottom)
+		frame.add(statusBar, BorderLayout.SOUTH);
 
 		// textPane
-		// create text pane
 		textPane = new JTextPane();
-		// add key listener that will allow user to type onto the textpane
+		// add KeyListener to keep track of whether the user is typing and spacebar presses
 		textPane.addKeyListener(this);
 		// set font
 		Font font = new Font("Arial", 10, 16);
@@ -118,7 +145,6 @@ public class GUI implements ActionListener, KeyListener
 		// fileMenu
 		JMenu fileMenu = new JMenu("File");
 
-		// populate menu bar item "File"
 		newItem = new JMenuItem("New");
 		newItem.addActionListener(this);
 		newItem.setAccelerator(KeyStroke.getKeyStroke('N', KeyEvent.CTRL_DOWN_MASK));
@@ -162,13 +188,11 @@ public class GUI implements ActionListener, KeyListener
 		editMenu.add(redoItem);
 
 		// networkMenu
-		// populate network button
 		JMenu networkMenu = new JMenu("Network");
 		syncItem = new JMenuItem("Sync");
 		networkMenu.add(syncItem);
 
 		// helpMenu
-		// populate help menu
 		JMenu helpMenu = new JMenu("Help");
 		aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(this);
@@ -180,15 +204,12 @@ public class GUI implements ActionListener, KeyListener
 		menuBar.add(networkMenu);
 		menuBar.add(helpMenu);
 
+		// sets up the system respond to the exit button being pressed
 		frame.addWindowListener(new WindowAdapter()
 		{
-			// sets up the system respond to the exit button being pressed
 			public void windowClosing(WindowEvent we)
 			{
-				// this will check if the current entries in the text area has been saved, if not it will bring up the save window
-				// (save, no save, cancel)
-				// will return true if saved, a save is made or the user selects not to save
-				// return false if user presses cancel
+				// if the saveCheck returns true, exit the program
 				if (saveCheck()) System.exit(0);
 			}
 		});
@@ -205,31 +226,38 @@ public class GUI implements ActionListener, KeyListener
 		frame.setSize(800, 600);
 		frame.setLocationRelativeTo(null);
 		frame.setJMenuBar(menuBar);
-		frame.setDefaultCloseOperation(frame.DO_NOTHING_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setVisible(true);
 
+		// timer for use in determining when the program is idle
 		timer = new Timer();
-		// timer for use in the idle state display
 
 	}
 
-	// this method is used to update the status label on the status bar
-	private void updateStatus(String s)
+	/**
+	 * Update the statusLabel in the statusBar
+	 * 
+	 * @param newStatus - the status to set
+	 */
+	private void updateStatus(String newStatus)
 	{
-		statusLabel.setText("Status: " + s);
+		statusLabel.setText("Status: " + newStatus);
 	}
 
-	// when the timer expires the status is set to idle
+	/**
+	 * When the TimerTask runs, update the status to be "Idle"
+	 */
 	public class Task extends TimerTask
 	{
 		public void run()
 		{
 			updateStatus("Idle");
-			timer.cancel();
 		}
 	}
 
-	// start the timer to repeat the task after a specified number of milliseconds
+	/**
+	 * Cancel the timer, then create a new timer and schedule it to run after 1 second
+	 */
 	private void startTimer()
 	{
 		try
@@ -241,11 +269,14 @@ public class GUI implements ActionListener, KeyListener
 
 		}
 		timer = new Timer();
-		timer.scheduleAtFixedRate(new Task(), 1_000, 1_000);
-		isTimerRunning = true;
+		timer.schedule(new Task(), 1_000);
 	}
 
-	// returns true if you should continue (closing or making a new document), false if the user wants to cancel the action
+	/**
+	 * Check if the action should continue
+	 * 
+	 * @return true if the action (closing/creating new document) should continue, false if not
+	 */
 	public boolean saveCheck()
 	{
 		boolean isDone = true;
@@ -266,7 +297,7 @@ public class GUI implements ActionListener, KeyListener
 		return isDone;
 	}
 
-	// reactions to button presses by the user
+	// responds to button presses by the user
 	public void actionPerformed(ActionEvent e)
 	{
 		// open file button
@@ -277,7 +308,7 @@ public class GUI implements ActionListener, KeyListener
 			// opens the file chooser
 			int returnVal = fileChooser.showOpenDialog(fileChooser);
 
-			if (returnVal == fileChooser.APPROVE_OPTION)
+			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
 				// set the currently open file to be the selected file
 				openedFile = fileChooser.getSelectedFile();
@@ -317,7 +348,9 @@ public class GUI implements ActionListener, KeyListener
 
 	}
 
-	// creates a new file
+	/**
+	 * Create a new file
+	 */
 	private void newFile()
 	{
 		updateStatus("Attempting to create new file");
@@ -329,7 +362,11 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
-	// saving file method
+	/**
+	 * Attempts to save file, will call the saveFileAs() method if there is no openedFile
+	 * 
+	 * @return whether the file has been successfully saved
+	 */
 	private boolean saveFile()
 	{
 		updateStatus("Saving File");
@@ -344,25 +381,35 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
-	// returns true if the file was saved, or if the user doesn't want to save. Should probably be refactored..
+	/**
+	 * Opens a JFileChooser to pick a destination for the file
+	 * 
+	 * @return true if the file has been saved or if the user doesn't want to save. Returns false if the user cancels at any point
+	 */
 	private boolean saveFileAs()
 	{
 		updateStatus("Saving File");
 
 		int returnVal = fileChooser.showSaveDialog(fileChooser);
 		// opens window
-		if (returnVal == fileChooser.APPROVE_OPTION)
+		if (returnVal == JFileChooser.APPROVE_OPTION)
 		// user chooses to save item
 		{
 			writeFile(fileChooser.getSelectedFile());
 			return true;
 		}
-		else if (returnVal == fileChooser.CANCEL_OPTION) return false; // cancel option
+		else if (returnVal == JFileChooser.CANCEL_OPTION) return false; // cancel option
 		return true;
 
 	}
 
 	// read text from file at print in the textPane
+	/**
+	 * Update the textPane with data read from a file on the disk
+	 * 
+	 * @param file - the file to read from
+	 * @throws Exception due to issues with IO
+	 */
 	private void readFile(File file) throws Exception
 	{
 		// creates String to store textPane data
@@ -396,7 +443,11 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
-	// write to existing file
+	/**
+	 * Write the contents of the textPane to the disk
+	 * 
+	 * @param file - the file to write to
+	 */
 	private void writeFile(File file)
 	{
 		try
@@ -434,13 +485,19 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
-	// word count updater
+	/**
+	 * Update the wordCountLabel
+	 */
 	private void updateWordLabel()
 	{
 		wordCountLabel.setText("Words: " + findWordCount());
 	}
 
-	// word count
+	/**
+	 * Find the word count of the textPane
+	 * 
+	 * @return the number of words in the textPane
+	 */
 	private int findWordCount()
 	{
 		return textPane.getText().split("\\s+").length;
