@@ -244,7 +244,7 @@ public class GUI implements ActionListener, KeyListener
 	/**
 	 * Cancel the timer, then create a new timer and schedule it to run after 1 second
 	 */
-	private void startTimer()
+	private void startTimer(int time)
 	{
 		try
 		{
@@ -255,7 +255,7 @@ public class GUI implements ActionListener, KeyListener
 
 		}
 		timer = new Timer();
-		timer.schedule(new Task(), 1_000);
+		timer.schedule(new Task(), time);
 	}
 
 	/**
@@ -309,19 +309,23 @@ public class GUI implements ActionListener, KeyListener
 					ex.printStackTrace();
 				}
 			}
+			startTimer(3000);
 		}
 		// remaining buttons call connected methods
 		else if (e.getSource() == saveAsItem)
 		{
 			saveFileAs();
+			startTimer(3000);
 		}
 		else if (e.getSource() == saveItem)
 		{
 			saveFile();
+			startTimer(3000);
 		}
 		else if (e.getSource() == newItem)
 		{
 			newFile();
+			startTimer(3000);
 		}
 		else if (e.getSource() == exitItem)
 		{
@@ -505,7 +509,7 @@ public class GUI implements ActionListener, KeyListener
 	{
 		isSaved = false;
 		updateStatus("Typing");
-		startTimer();
+		startTimer(500);
 	}
 
 	// method required by KeyListener interface
