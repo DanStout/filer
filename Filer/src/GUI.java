@@ -32,7 +32,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+//import javax.swing.undo;
 /**
  * Create the GUI, and handle events
  * 
