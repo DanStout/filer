@@ -1,3 +1,5 @@
+package client;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -32,6 +34,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 //import javax.swing.undo;
 /**
  * Create the GUI, and handle events
@@ -496,7 +499,8 @@ public class GUI implements ActionListener, KeyListener
 	// detects if the user is typing
 	public void keyPressed(KeyEvent e)
 	{
-
+		updateStatus("Typing");
+		startTimer(800);
 		// update the wordCountLabel when space is pressed (new word)
 		if (e.getKeyCode() == KeyEvent.VK_SPACE)
 		{
@@ -508,8 +512,6 @@ public class GUI implements ActionListener, KeyListener
 	public void keyReleased(KeyEvent e)
 	{
 		isSaved = false;
-		updateStatus("Typing");
-		startTimer(500);
 	}
 
 	// method required by KeyListener interface
