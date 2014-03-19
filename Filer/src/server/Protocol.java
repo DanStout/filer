@@ -2,9 +2,9 @@ package server;
 
 import java.util.ArrayList;
 
+// the protocol class will be in charge of managing information retrieved from the client
 public class Protocol
 {
-	// this is the protocol class, it will be in charge of managing information retrieved from the client
 	private ArrayList<String> projects = new ArrayList<String>();
 
 	// constructor

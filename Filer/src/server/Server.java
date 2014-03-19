@@ -16,16 +16,17 @@ public class Server
 	{
 		final int portnum = 5000;
 		Protocol pro = new Protocol();
-		try
-		{
-			// attempts to create server resources
-			serSocket = new ServerSocket(portnum);
-			// accepts client request and returns another socket object
-			client = serSocket.accept();
-			// creates read/write tools
-			PrintWriter output = new PrintWriter(client.getOutputStream(), true);
-			BufferedReader input = new BufferedReader(new InputStreamReader(client.getInputStream()));
+		try (
+		// attempts to create server resources
+		ServerSocket SSocket = new ServerSocket(portnum);
+				// accepts client request and returns another socket object
+				Socket client = SSocket.accept();
+				// creates read/write tools
+				PrintWriter output = new PrintWriter(client.getOutputStream(), true);
+				BufferedReader input = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
+		)
+		{
 			// pass string will be written back to client
 			String pass;
 			// infinite loop which runs until "disconnect" is returned by the InputStream
@@ -45,12 +46,8 @@ public class Server
 		}
 		catch (Exception e)
 		{
-			System.out.println("error creating network socket, Port number:" + portnum);
+			System.out.println("Error creating network socket, Port number:" + portnum);
 			System.exit(1);
-		}
-		finally
-		{
-			serSocket.close();
 		}
 
 	}
