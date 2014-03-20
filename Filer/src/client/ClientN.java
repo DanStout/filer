@@ -8,6 +8,7 @@ public class ClientN {
 	//? how do we write into this class? I want to use (reader.ready();)
 	//private BufferedReader reader = new BufferedReader();
 	
+	
 	public ClientN(){	
 	}
 	
@@ -51,6 +52,12 @@ public class ClientN {
 		}
 		
 		
+	}
+	
+	//this method will control the passing of data into the network class
+	//the class will check to see that the string is valid before it passes in
+	public String Ready(String s){
+		return s;
 	}
 	
 
