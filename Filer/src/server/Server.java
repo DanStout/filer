@@ -9,19 +9,19 @@ import java.net.Socket;
 
 public class Server
 {
-	static ServerSocket serSocket;
+	static ServerSocket SSocket;
 	static Socket client;
 
-	public static void main(String args[]) throws IOException
+	public static void main(String args[]) throws IOException, InterruptedException
 	{
 		final int portnum = 5000;
 		Protocol pro = new Protocol();
 		try
 		{
 		// attempts to create server resources
-		ServerSocket SSocket = new ServerSocket(portnum);
+				SSocket = new ServerSocket(portnum);
 				// accepts client request and returns another socket object
-				Socket client = SSocket.accept();
+				client = SSocket.accept();
 				// creates read/write tools
 				PrintWriter output = new PrintWriter(client.getOutputStream(), true);
 				BufferedReader input = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -39,17 +39,34 @@ public class Server
 					// pass is written to the client
 					output.write(pass);
 					// break out of loop
-					if (pass.equalsIgnoreCase("diconnect")) break;
+					if (pass.equalsIgnoreCase("diconnect"))
+						break;
 				}
 			}
+			
 		}
-		catch (Exception e)
+		catch (IOException e)
 		{
 			System.out.println("Error creating network socket, Port number:" + portnum);
 			System.exit(1);
 		}
-		finally
-		{
+		//finally block to close server resources
+		finally{
+			//try block to deal with IO errors
+			try {
+				if(SSocket != null)
+					SSocket.close();
+				if(client != null)
+					client.close();
+			}
+			//error outputs, thread pause to delay exit
+			catch(IOException e){
+				System.out.println("there was an error closing the system resources, hard exit in 30 seconds.");
+				Thread.sleep(30000);
+				System.exit(1);
+			}
+			finally{
+			}
 		}
 
 	}
