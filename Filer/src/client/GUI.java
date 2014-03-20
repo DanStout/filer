@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -289,6 +290,22 @@ public class GUI implements ActionListener, KeyListener
 	// responds to button presses by the user
 	public void actionPerformed(ActionEvent e)
 	{
+		//sync button
+		if(e.getSource() == syncItem){
+			//attempt to send data
+			try{
+				//create client
+				ClientN client = new ClientN();
+				//use connect method
+				client.connect(5000, "LocalHost", textPane.getText());
+			}
+			catch(IOException e1){
+				System.out.println("error connecting and sending file to server");
+			}
+			catch (InterruptedException e2) {
+				System.out.println("error connecting and sending file to server");
+			}
+		}
 		// open file button
 		if (e.getSource() == openItem)
 		{

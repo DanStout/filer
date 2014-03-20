@@ -13,7 +13,8 @@ public class ClientN {
 	}
 	
 	//custom connect method so a user can pass in a port number and a host address
-	public void connect (int portnum, String host) throws InterruptedException, IOException {
+	public void connect (int portnum, String host, String n) throws InterruptedException, IOException {
+		int tries = 0;
 		//try block
 		try{
 			//create the client socket
@@ -23,9 +24,13 @@ public class ClientN {
 			//create steam reader to take information in from the server
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
-			while (true){
-				
+			out.println(n);
+			while (!in.readLine().equalsIgnoreCase("disconnect") && tries < 6){	
+				out.flush();
+				tries++;
 			}
+			if(tries == 6)
+				System.out.println("data was unable to send after 5 attempts");
 			
 			
 		}
