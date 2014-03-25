@@ -297,7 +297,7 @@ public class GUI implements ActionListener, KeyListener
 				//create client
 				ClientN client = new ClientN();
 				//use connect method
-				client.connect(5000, "LocalHost", textPane.getText());
+				client.connect(5001, "LocalHost", textPane.getText());
 			}
 			catch(IOException e1){
 				System.out.println("error connecting and sending file to server");
