@@ -54,6 +54,7 @@ public class Server
                
 					
 					//CHANGES REQUIRED
+					//change
                else if(pass.equalsIgnoreCase("ready for write to client")){
                //will execute the code to send file to client
                   byte[] mybytearray = new byte[(int) myFile.length()]; //NEED TO MAKE ARRAY LIST
