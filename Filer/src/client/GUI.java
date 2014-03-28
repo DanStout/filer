@@ -53,7 +53,7 @@ public class GUI implements ActionListener, KeyListener
 {
 	// declarations
 	JFrame frame, aboutFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, syncItem, exitItem;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, writeItem, pullItem, exitItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
 	File openedFile;
@@ -179,8 +179,12 @@ public class GUI implements ActionListener, KeyListener
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
-		syncItem = new JMenuItem("Sync");
-		networkMenu.add(syncItem);
+		writeItem = new JMenuItem("Write");
+		pullItem = new JMenuItem("Pull");
+		
+		
+		networkMenu.add(writeItem);
+		networkMenu.add(pullItem);
 
 		// helpMenu
 		JMenu helpMenu = new JMenu("Help");
@@ -291,19 +295,53 @@ public class GUI implements ActionListener, KeyListener
 	public void actionPerformed(ActionEvent e)
 	{
 		//sync button
-		if(e.getSource() == syncItem){
+		if(e.getSource() == writeItem){
 			//attempt to send data
 			try{
 				//create client
 				ClientN client = new ClientN();
 				//use connect method
-				client.connect(5001, "LocalHost", textPane.getText());
+				if(isSaved == true){
+					client.connect(5001, "LocalHost", openedFile);
+				} else {
+					if(openedFile == null){
+						saveFileAs();
+						if(isSaved == true){
+							client.connect(5001, "LocalHost", openedFile);
+						} else {
+							System.out.println("You must save your file before you can write it to the server.");
+						}
+					} else {
+						saveFile();
+						if(isSaved == true){
+							client.connect(5001, "LocalHost", openedFile);
+						} else {
+							System.out.println("You must save your file before you can write it to the server.");
+						}
+					}
+				}
+				
 			}
 			catch(IOException e1){
 				System.out.println("error connecting and sending file to server");
 			}
 			catch (InterruptedException e2) {
 				System.out.println("error connecting and sending file to server");
+			}
+		}
+		if(e.getSource() == pullItem){
+			//attempt to send data
+			try{
+				//create client
+				ClientN client = new ClientN();
+				//use connect method
+				client.connect(5001, "LocalHost", openedFile);
+			}
+			catch(IOException e1){
+				System.out.println("error connecting and retrieving file from server");
+			}
+			catch (InterruptedException e2) {
+				System.out.println("error connecting and retrieving file from server");
 			}
 		}
 		// open file button
