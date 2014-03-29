@@ -1,9 +1,12 @@
 package server;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -48,25 +51,48 @@ public class Server
 					if (pass.equalsIgnoreCase("disconnect"))
 						break;
                
-               else if(pass.equalsIgnoreCase("ready for write to server")){
+					else if(pass.equalsIgnoreCase("ready for write to server")){
                   
-               }
+					}
+				
+					//this will trigger if the client requests a list of the files on the server
+					else if (pass.equalsIgnoreCase("return file list")){
+						output.write(getFileN(myFile));
+					}
                
 					
 					//CHANGES REQUIRED
 					//change
-               else if(pass.equalsIgnoreCase("ready for write to client")){
-               //will execute the code to send file to client
-                  byte[] mybytearray = new byte[(int) myFile.length()]; //NEED TO MAKE ARRAY LIST
-                  //create byte array of proper size
-                  BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile));
-                  //populates the array using this input stream
-                  bis.read(mybytearray, 0, mybytearray.length);
-                  //populate the array of bytes
-                  OutputStream os = SSocket.getOutputStream();
-                  //send the array of bytes over the socket
-                  os.write(mybytearray, 0, mybytearray.length);
-               }
+					//this if statement triggers if the client has requested the pulling of a file
+					else if(pass.equalsIgnoreCase("ready for write to client")){
+						int n = 0;
+            	   //sends list of files to client
+						output.write(getFileN(myFile));
+						//waits for reply of file choice
+						input.ready();
+						//try to parse the line into an int
+						try{
+						 n = Integer.parseInt(input.readLine());
+						}
+						//catch
+						catch(IOException e){
+							System.out.println("there was an error getting the file choice from the client");
+						}
+						
+            	   
+						//will execute the code to send file to client
+						byte[] mybytearray = new byte[(int) myFile.get(n).length()]; //NEED TO MAKE ARRAY LIST
+						//create byte array of proper size
+						BufferedInputStream bis = new BufferedInputStream(new FileInputStream(myFile.get(n)));
+						//populates the array using this input stream
+						bis.read(mybytearray, 0, mybytearray.length);
+						//	populate the array of bytes
+						OutputStream os = client.getOutputStream();
+						//send the array of bytes over the socket
+						os.write(mybytearray, 0, mybytearray.length);
+						//close the buffered input stream
+						bis.close();
+					}
 				}
 			}
 			
@@ -95,6 +121,21 @@ public class Server
 			}
 		}
 
+	}
+	//this will return a list of the file names in the array list
+	public static String getFileN(ArrayList<File> myFile){
+		//count used to present the files number on the server
+		int count = 0;
+		String ret = "[" + count +" " ;
+		//loop through to find name
+		for (int i = 0; i < myFile.size(); i++){
+			//increment count
+			count++;
+			ret += myFile.get(i).getName();
+			ret += ", " + count + " ";
+		}
+		ret += " ]";
+		return ret;
 	}
 }
 

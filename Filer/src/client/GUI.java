@@ -173,7 +173,7 @@ public class GUI implements ActionListener, KeyListener
 
 		redoItem = new JMenuItem("Redo");
 		redoItem.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
-
+		
 		editMenu.add(undoItem);
 		editMenu.add(redoItem);
 
@@ -573,5 +573,19 @@ public class GUI implements ActionListener, KeyListener
 	public void keyTyped(KeyEvent e)
 	{
 
+	}
+	
+	public static int FileNames(String s){
+		int ret = -1;
+		try{
+		ret = Integer.parseInt(JOptionPane.showInputDialog("files on the server\n" + s + "\n please choose a file by typing the file's number into the box below"));
+		}
+		catch (Exception e){
+			//JOptionPane.showInternalMessageDialog(null, "there was an error with your input please try again", "Error!", "1");
+			System.out.println("There was an error with your input, please try again");
+			ret = FileNames(s);
+
+		}
+		return ret;
 	}
 }

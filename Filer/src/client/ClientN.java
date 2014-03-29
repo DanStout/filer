@@ -14,7 +14,6 @@ public class ClientN {
 	
 	//custom connect method so a user can pass in a port number and a host address
 	public void connect (int portnum, String host, File n) throws InterruptedException, IOException {
-		int tries = 0;
 		//try block
 		try{
 			//create the client socket
@@ -24,14 +23,36 @@ public class ClientN {
 			//create steam reader to take information in from the server
 			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
-			out.println(n);
-			while (!in.readLine().equalsIgnoreCase("disconnect") && tries < 6){	
-				out.flush();
-				tries++;
-			}
-			if(tries == 6)
-				System.out.println("data was unable to send after 5 attempts");
+			//connection check
+			out.write("connection check");
+			in.ready();
+			if (!in.readLine().equalsIgnoreCase("confirmed"))
+				return;
 			
+			
+			out.write("write to server");
+			in.ready();
+			if(in.readLine().equalsIgnoreCase("ready for write to server")){
+				try{
+					//will execute the code to send file to client
+					byte[] mybytearray = new byte[(int) n.length()]; //NEED TO MAKE ARRAY LIST
+					//create byte array of proper size
+					BufferedInputStream bis = new BufferedInputStream(new FileInputStream(n));
+					//populates the array using this input stream
+					bis.read(mybytearray, 0, mybytearray.length);
+					//	populate the array of bytes
+					OutputStream os = client.getOutputStream();
+					//send the array of bytes over the socket
+					os.write(mybytearray, 0, mybytearray.length);
+					//close the buffered input stream
+					bis.close();
+			
+					out.write("disconnect");
+				}
+				catch(Exception e){
+					System.out.println("there was an error sending the file");
+				}
+			}
 			
 		}
 		catch(IOException e){
@@ -59,6 +80,10 @@ public class ClientN {
 		
 	}
    
+	
+	
+	
+	
       //this version of the connect method does not require a file to be input in its call, it will be used for pulling the file
    	public void connect (int portnum, String host) throws InterruptedException, IOException {
 
@@ -73,11 +98,34 @@ public class ClientN {
 			//create steam reader to take information in from the server
 			BufferedReader intext = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			
-			out.println("pull file");
+					
+			//connection check
+			out.write("connection check");
 			intext.ready();
-			if(intext.readLine().equalsIgnoreCase("ready for write to client")){
-				while(!intext.readLine().equalsIgnoreCase("disconnect")){
-                  
+			if (!intext.readLine().equalsIgnoreCase("confirmed"))
+				return;
+			
+					//sends request to pull file
+					out.println("pull file");
+					//waits for reply
+					intext.ready();
+					//response
+					if(intext.readLine().equalsIgnoreCase("ready for write to client")){
+						int i = 0;
+						//waits for the server to send the list of files
+						intext.ready();
+						//prompts user for file choice
+						try{
+							//set i equal to file choice
+							i = GUI.FileNames(intext.readLine());
+						}
+						catch (Exception e){
+							System.out.println("there was an error getting the file list");
+						}
+						//sends the file choice to the server
+					out.write(i);
+					
+
 					byte[] mybytearray = new byte[4096];
 					//creates a byte array 4 kb is size
    		         	FileOutputStream fos = new FileOutputStream("Newly Pulled File.txt");
@@ -89,12 +137,14 @@ public class ClientN {
    		         	bos.write(mybytearray, 0, bytesRead);
    		         	//writes the array to the file
    		         	bos.close();
-   		         	//close stream
+   		         	//close stream	
+   		         	out.write("disconnect");
 				}
-			}
-         else {
-            System.out.println("there was an error in the server");
-         }
+				else {
+   		      		System.out.println("there was an error in the server");
+				}
+			
+         
 			
 		}
 		catch(IOException e){
@@ -122,11 +172,6 @@ public class ClientN {
 		
 	}
 	
-	//this method will control the passing of data into the network class
-	//the class will check to see that the string is valid before it passes in
-	public String Ready(String s){
-		return s;
-	}
 	
 
 }

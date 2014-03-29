@@ -31,6 +31,12 @@ public class Protocol
 
 		// disconnect code from client
 		else if (input.equalsIgnoreCase("disconnect")) return "disconnect";
+		
+		//client announcing it will write to server
+		else if(input.equalsIgnoreCase("Write to server")) return "ready for write to server";
+		
+		//client requesting file from server
+		else if(input.equalsIgnoreCase("pull file")) return "ready for write to client";
 
 		// not actual code, ignore this
 		return "make the ide happy";
