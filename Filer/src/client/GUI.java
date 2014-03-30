@@ -154,6 +154,16 @@ public class GUI implements ActionListener, KeyListener
 		exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(this);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
+		
+		writeItem = new JMenuItem("Write");
+		writeItem.addActionListener(this);
+		
+		pullItem = new JMenuItem("Pull");
+		pullItem.addActionListener(this);
+		
+		listItem = new JMenuItem("List");
+		listItem.addActionListener(this);
+		
 
 		// add populations to the menu
 		fileMenu.add(newItem);
@@ -179,13 +189,15 @@ public class GUI implements ActionListener, KeyListener
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
-		writeItem = new JMenuItem("Write");
-		pullItem = new JMenuItem("Pull");
-		listItem = new JMenuItem("List");
+		networkMenu.add(writeItem);
+		networkMenu.add(pullItem);
+		networkMenu.add(listItem);
+		
 		
 		
 		networkMenu.add(writeItem);
 		networkMenu.add(pullItem);
+		networkMenu.add(listItem);
 
 		// helpMenu
 		JMenu helpMenu = new JMenu("Help");
@@ -330,13 +342,13 @@ public class GUI implements ActionListener, KeyListener
 				System.out.println("error connecting and sending file to server");
 			}
 		}
-		if(e.getSource() == pullItem){
+		else if(e.getSource() == pullItem){
 			//attempt to send data
 			try{
 				//create client
 				ClientN client = new ClientN();
 				//use connect method
-				client.connect(5001, "LocalHost", openedFile);
+				client.connect(5001, "LocalHost");
 			}
 			catch(IOException e1){
 				//JOptionPane.showMessageDialog(frame, "derp");
@@ -347,13 +359,13 @@ public class GUI implements ActionListener, KeyListener
 			}
 		}
 		//requests list of files on the server
-		if(e.getSource() == listItem){
+		else if(e.getSource() == listItem){
 			
 		}
 		
 		
 		// open file button
-		if (e.getSource() == openItem)
+		else if (e.getSource() == openItem)
 		{
 			// change status
 			updateStatus("Opening file");
