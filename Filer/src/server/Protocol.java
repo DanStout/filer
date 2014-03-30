@@ -37,6 +37,9 @@ public class Protocol
 		
 		//client requesting file from server
 		else if(input.equalsIgnoreCase("pull file")) return "ready for write to client";
+		
+		else if(input.equalsIgnoreCase("request list")) return "return file list";
+		
 
 		// not actual code, ignore this
 		return "make the ide happy";

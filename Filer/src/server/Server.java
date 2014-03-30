@@ -1,10 +1,13 @@
 package server;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -32,6 +35,7 @@ public class Server
 				// creates read/write tools
 				PrintWriter output = new PrintWriter(client.getOutputStream(), true);
 				BufferedReader input = new BufferedReader(new InputStreamReader(client.getInputStream()));
+				
 
 			// pass string will be written back to client
 			String pass;
@@ -52,6 +56,34 @@ public class Server
 						break;
                
 					else if(pass.equalsIgnoreCase("ready for write to server")){
+						File temp = null;
+						
+						//getting file name
+						input.ready();
+						String name = input.readLine();
+						
+						//creates file object and names it.
+						temp = new File(name);
+						
+						//create input stream for file
+						InputStream in = client.getInputStream();
+						
+						byte[] mybytearray = new byte[4096];
+						//creates a byte array 4 kb in size
+	   		         	FileOutputStream fos = new FileOutputStream(temp);
+	   		         	//creates file output stream to create a file
+	   		         	BufferedOutputStream bos = new BufferedOutputStream(fos);
+	   		         	//outputs stream to the file
+	   		         	int bytesRead = in.read(mybytearray, 0, mybytearray.length);
+	   		         	//reads in the array of bytes to make the file
+	   		         	bos.write(mybytearray, 0, bytesRead);
+	   		         	//writes the array to the file
+	   		         	bos.close();
+	   		         	//close stream
+	   		         	in.close();
+	   		         	
+	   		         	myFile.add(temp);
+	   		         	output.write("disconnect");
                   
 					}
 				

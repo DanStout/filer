@@ -1,6 +1,7 @@
 package client;
 import java.io.*;
 import java.net.*;
+
 public class ClientN {
 	//this is the client network class, access this to get a connection to the server
 	private Socket client;
@@ -14,6 +15,7 @@ public class ClientN {
 	
 	//custom connect method so a user can pass in a port number and a host address
 	public void connect (int portnum, String host, File n) throws InterruptedException, IOException {
+		String name = n.getName();
 		//try block
 		try{
 			//create the client socket
@@ -33,6 +35,10 @@ public class ClientN {
 			out.write("write to server");
 			in.ready();
 			if(in.readLine().equalsIgnoreCase("ready for write to server")){
+				
+				//write the name of the file to the server
+				out.write(name);
+				
 				try{
 					//will execute the code to send file to client
 					byte[] mybytearray = new byte[(int) n.length()]; //NEED TO MAKE ARRAY LIST
@@ -117,7 +123,11 @@ public class ClientN {
 						//prompts user for file choice
 						try{
 							//set i equal to file choice
+							//i will return return -1 if error occurred
 							i = GUI.FileNames(intext.readLine());
+							//error check
+							if(i == -1)
+								return;
 						}
 						catch (Exception e){
 							System.out.println("there was an error getting the file list");
@@ -172,6 +182,56 @@ public class ClientN {
 		
 	}
 	
-	
+	public  String ListServer(int portnum, String host) throws InterruptedException{
+		String ret = null;
+		
+		
+		//try block
+		try{
+			//create the client socket
+			client = new Socket(host, portnum);
+			//create stream writer to outputs data to the server
+			PrintWriter out = new PrintWriter(client.getOutputStream());
+			//create steam reader to take information in from the server
+			BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+					
+			//connection check
+			out.write("connection check");
+			in.ready();
+			if (!in.readLine().equalsIgnoreCase("confirmed"))
+				return "connection error";
+			
+			try{
+				out.write("request list");
+				in.ready();
+				ret = in.readLine();
+			}
+			catch(Exception e){
+				System.out.println("there was an error getting the file list from the server");
+			}
+	}
+	catch(IOException e){
+		//error output
+		System.out.print("there was an issue connecting to server at " + host + " on port number " + portnum + " please check the information and try again");
+	}
+	//finally to close client resources
+	finally{
+		//try block to close
+		try{
+			if(client != null)
+				client.close();
+		}
+		//catch and error report, thread sleep used to delay exit
+		catch (IOException e){
+			System.out.println("there was an error closing recources, hard system exit in 30 seconds");
+			Thread.sleep(30000);
+			System.exit(1);
+		}
+		//finally for try block in the outer finally
+		finally{
+		}
+	}
+		return ret;
+	}
 
 }

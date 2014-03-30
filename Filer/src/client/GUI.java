@@ -53,7 +53,7 @@ public class GUI implements ActionListener, KeyListener
 {
 	// declarations
 	JFrame frame, aboutFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, writeItem, pullItem, exitItem;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, writeItem, pullItem, exitItem, listItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
 	File openedFile;
@@ -181,6 +181,7 @@ public class GUI implements ActionListener, KeyListener
 		JMenu networkMenu = new JMenu("Network");
 		writeItem = new JMenuItem("Write");
 		pullItem = new JMenuItem("Pull");
+		listItem = new JMenuItem("List");
 		
 		
 		networkMenu.add(writeItem);
@@ -338,12 +339,19 @@ public class GUI implements ActionListener, KeyListener
 				client.connect(5001, "LocalHost", openedFile);
 			}
 			catch(IOException e1){
+				//JOptionPane.showMessageDialog(frame, "derp");
 				System.out.println("error connecting and retrieving file from server");
 			}
 			catch (InterruptedException e2) {
 				System.out.println("error connecting and retrieving file from server");
 			}
 		}
+		//requests list of files on the server
+		if(e.getSource() == listItem){
+			
+		}
+		
+		
 		// open file button
 		if (e.getSource() == openItem)
 		{
