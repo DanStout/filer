@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,15 +52,19 @@ public class GUI implements ActionListener, KeyListener
 {
 	// declarations
 	JFrame frame, aboutFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, writeItem, pullItem, exitItem, listItem;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
-	File openedFile;
+	File currentFile;
 	JPanel statusBar;
 	String status = "Idle";
 	JLabel statusLabel, wordCountLabel;
 	boolean isSaved = true;
 	Timer timer;
+	Client client;
+
+	int port = 10500;
+	String host = "127.0.0.1";
 
 	/**
 	 * Initialize the aboutFrame JFrame
@@ -154,16 +157,6 @@ public class GUI implements ActionListener, KeyListener
 		exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(this);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
-		
-		writeItem = new JMenuItem("Write");
-		writeItem.addActionListener(this);
-		
-		pullItem = new JMenuItem("Pull");
-		pullItem.addActionListener(this);
-		
-		listItem = new JMenuItem("List");
-		listItem.addActionListener(this);
-		
 
 		// add populations to the menu
 		fileMenu.add(newItem);
@@ -183,21 +176,23 @@ public class GUI implements ActionListener, KeyListener
 
 		redoItem = new JMenuItem("Redo");
 		redoItem.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
-		
+
 		editMenu.add(undoItem);
 		editMenu.add(redoItem);
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
-		networkMenu.add(writeItem);
-		networkMenu.add(pullItem);
-		networkMenu.add(listItem);
-		
-		
-		
-		networkMenu.add(writeItem);
-		networkMenu.add(pullItem);
-		networkMenu.add(listItem);
+
+		sendFileItem = new JMenuItem("Send File");
+		sendFileItem.addActionListener(this);
+		sendFileItem.setAccelerator(KeyStroke.getKeyStroke('T', KeyEvent.CTRL_DOWN_MASK));
+
+		getFileItem = new JMenuItem("Get File");
+		getFileItem.addActionListener(this);
+		getFileItem.setAccelerator(KeyStroke.getKeyStroke('G', KeyEvent.CTRL_DOWN_MASK));
+
+		networkMenu.add(sendFileItem);
+		networkMenu.add(getFileItem);
 
 		// helpMenu
 		JMenu helpMenu = new JMenu("Help");
@@ -217,7 +212,7 @@ public class GUI implements ActionListener, KeyListener
 			public void windowClosing(WindowEvent we)
 			{
 				// if the saveCheck returns true, exit the program
-				if (saveCheck()) System.exit(0);
+				if (saveCheck()) exit();
 			}
 		});
 
@@ -239,6 +234,11 @@ public class GUI implements ActionListener, KeyListener
 		// timer for use in determining when the program is idle
 		timer = new Timer();
 
+	}
+
+	private void exit()
+	{
+		System.exit(0);
 	}
 
 	/**
@@ -273,7 +273,7 @@ public class GUI implements ActionListener, KeyListener
 		}
 		catch (Exception ex)
 		{
-
+			// do nothing, exception just means the timer wasn't already running
 		}
 		timer = new Timer();
 		timer.schedule(new Task(), time);
@@ -307,112 +307,57 @@ public class GUI implements ActionListener, KeyListener
 	// responds to button presses by the user
 	public void actionPerformed(ActionEvent e)
 	{
-		//sync button
-		if(e.getSource() == writeItem){
-			//attempt to send data
-			try{
-				//create client
-				ClientN client = new ClientN();
-				//use connect method
-				if(isSaved == true){
-					client.connect(5001, "LocalHost", openedFile);
-				} else {
-					if(openedFile == null){
-						saveFileAs();
-						if(isSaved == true){
-							client.connect(5001, "LocalHost", openedFile);
-						} else {
-							System.out.println("You must save your file before you can write it to the server.");
-						}
-					} else {
-						saveFile();
-						if(isSaved == true){
-							client.connect(5001, "LocalHost", openedFile);
-						} else {
-							System.out.println("You must save your file before you can write it to the server.");
-						}
-					}
-				}
-				
-			}
-			catch(IOException e1){
-				System.out.println("error connecting and sending file to server");
-			}
-			catch (InterruptedException e2) {
-				System.out.println("error connecting and sending file to server");
-			}
+		if (e.getSource() == sendFileItem)
+		{
+			sendFile();
 		}
-		else if(e.getSource() == pullItem){
-			//attempt to send data
-			try{
-				//create client
-				ClientN client = new ClientN();
-				//use connect method
-				client.connect(5001, "LocalHost");
-			}
-			catch(IOException e1){
-				//JOptionPane.showMessageDialog(frame, "derp");
-				System.out.println("error connecting and retrieving file from server");
-			}
-			catch (InterruptedException e2) {
-				System.out.println("error connecting and retrieving file from server");
-			}
+		else if (e.getSource() == getFileItem)
+		{
+			getFile();
 		}
-		//requests list of files on the server
-		else if(e.getSource() == listItem){
-			
-		}
-		
-		
-		// open file button
+
 		else if (e.getSource() == openItem)
 		{
-			// change status
-			updateStatus("Opening file");
-			// opens the file chooser
-			int returnVal = fileChooser.showOpenDialog(fileChooser);
-
-			if (returnVal == JFileChooser.APPROVE_OPTION)
-			{
-				// set the currently open file to be the selected file
-				openedFile = fileChooser.getSelectedFile();
-
-				// attempt to read file
-				try
-				{
-					readFile(openedFile);
-				}
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
-			}
-			startTimer(3000);
+			openFile();
 		}
-		// remaining buttons call connected methods
 		else if (e.getSource() == saveAsItem)
 		{
 			saveFileAs();
-			startTimer(3000);
 		}
 		else if (e.getSource() == saveItem)
 		{
 			saveFile();
-			startTimer(3000);
 		}
 		else if (e.getSource() == newItem)
 		{
 			newFile();
-			startTimer(3000);
 		}
 		else if (e.getSource() == exitItem)
 		{
-			if (saveCheck()) System.exit(0);
+			if (saveCheck()) exit();
 		}
 		else if (e.getSource() == aboutItem)
 		{
 			aboutFrame();
 		}
+
+	}
+
+	private void sendFile()
+	{
+		client = new Client(host, port);
+		if (saveCheck() && currentFile != null) client.sendFile(currentFile);
+	}
+
+	private void getFile()
+	{
+		System.out.println("Attempting to get file list");
+		client = new Client(host, port);
+		String[] files = client.getFileList();
+
+		String chosenFile = (String) JOptionPane.showInputDialog(frame, "Which file would you like to retrieve?", "Choose a file", JOptionPane.QUESTION_MESSAGE, null, files, files[0]);
+
+		textPane.setText(client.getFileContents(chosenFile));
 
 	}
 
@@ -422,11 +367,37 @@ public class GUI implements ActionListener, KeyListener
 	private void newFile()
 	{
 		updateStatus("Attempting to create new file");
+		startTimer(3000);
 		if (saveCheck())
 		{
 			textPane.setText("");
 			updateStatus("New File Created");
 			frame.setTitle("Filer - Untitled.txt");
+		}
+	}
+
+	private void openFile()
+	{
+		// change status
+		updateStatus("Opening file");
+		startTimer(3000);
+		// opens the file chooser
+		int returnVal = fileChooser.showOpenDialog(fileChooser);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION)
+		{
+			// set the currently open file to be the selected file
+			currentFile = fileChooser.getSelectedFile();
+
+			// attempt to read file
+			try
+			{
+				readFile(currentFile);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -438,13 +409,14 @@ public class GUI implements ActionListener, KeyListener
 	private boolean saveFile()
 	{
 		updateStatus("Saving File");
+		startTimer(3000);
 
 		// if there is no opened file, call the SaveFileAs method
-		if (openedFile == null) return saveFileAs();
+		if (currentFile == null) return saveFileAs();
 		else
 		{
 			// if it is an existing file then the file is simply written to the drive
-			writeFile(openedFile);
+			writeFile(currentFile);
 			return true;
 		}
 	}
@@ -457,13 +429,15 @@ public class GUI implements ActionListener, KeyListener
 	private boolean saveFileAs()
 	{
 		updateStatus("Saving File");
+		startTimer(3000);
 
 		int returnVal = fileChooser.showSaveDialog(fileChooser);
 		// opens window
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		// user chooses to save item
 		{
-			writeFile(fileChooser.getSelectedFile());
+			currentFile = fileChooser.getSelectedFile();
+			writeFile(currentFile);
 			return true;
 		}
 		else if (returnVal == JFileChooser.CANCEL_OPTION) return false; // cancel option
@@ -592,20 +566,6 @@ public class GUI implements ActionListener, KeyListener
 	// method required by KeyListener interface
 	public void keyTyped(KeyEvent e)
 	{
-
 	}
-	
-	public static int FileNames(String s){
-		int ret = -1;
-		try{
-		ret = Integer.parseInt(JOptionPane.showInputDialog("files on the server\n" + s + "\n please choose a file by typing the file's number into the box below"));
-		}
-		catch (Exception e){
-			//JOptionPane.showInternalMessageDialog(null, "there was an error with your input please try again", "Error!", "1");
-			System.out.println("There was an error with your input, please try again");
-			ret = FileNames(s);
 
-		}
-		return ret;
-	}
 }
