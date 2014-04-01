@@ -9,6 +9,18 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
+/**
+ * Communicates with the server
+ * 
+ * @author Nick Brooks
+ * @author George Faraj
+ * @author Andy Kenney
+ * @author George Sousa
+ * @author Daniel Stout
+ * 
+ * @version 2014/Apr/1
+ * 
+ */
 public class Client
 {
 	Socket socket;
@@ -19,6 +31,12 @@ public class Client
 	BufferedInputStream bis;
 	ObjectInputStream ois;
 
+	/**
+	 * Initiates the client
+	 *
+	 * @param hostname - hostname of server (IP address)
+	 * @param portnum - port of server (Should be above 1023 as below that are reserved)
+	 */
 	public Client(String hostname, int portnum)
 	{
 		try
@@ -34,6 +52,11 @@ public class Client
 		}
 	}
 
+	/**
+	 * Sends a file to the server
+	 * 
+	 * @param file - the file to send
+	 */
 	public void sendFile(File file)
 	{
 		try
@@ -73,6 +96,11 @@ public class Client
 		}
 	}
 
+	/**
+	 * Gets the list of files on the server
+	 * 
+	 * @return an array of the names of the files on the server
+	 */
 	public String[] getFileList()
 	{
 		File[] files = null;
@@ -101,6 +129,12 @@ public class Client
 		return filenames;
 	}
 
+	/**
+	 * Gets the contents of a file from the server
+	 * 
+	 * @param filename - the name of the file selected
+	 * @return the contents of the file as a String
+	 */
 	public String getFileContents(String filename)
 	{
 		try

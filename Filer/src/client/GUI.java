@@ -35,7 +35,6 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-//import javax.swing.undo;
 /**
  * Create the GUI, and handle events
  * 
@@ -45,7 +44,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author George Sousa
  * @author Daniel Stout
  * 
- * @version Mar 17, 2014
+ * @version 2014/Apr/1
  * 
  */
 public class GUI implements ActionListener, KeyListener
@@ -236,6 +235,9 @@ public class GUI implements ActionListener, KeyListener
 
 	}
 
+	/**
+	 * Exit the program
+	 */
 	private void exit()
 	{
 		System.exit(0);
@@ -282,7 +284,7 @@ public class GUI implements ActionListener, KeyListener
 	/**
 	 * Check if the action should continue
 	 * 
-	 * @return true if the action (closing/creating new document) should continue, false if not
+	 * @return true if the action (closing/creating new document) should continue, false if it should not.
 	 */
 	public boolean saveCheck()
 	{
@@ -343,12 +345,18 @@ public class GUI implements ActionListener, KeyListener
 
 	}
 
+	/**
+	 * Sends the current file to the server
+	 */
 	private void sendFile()
 	{
 		client = new Client(host, port);
 		if (saveCheck() && currentFile != null) client.sendFile(currentFile);
 	}
 
+	/**
+	 * Gets the list of available files from the server, asks the user which one they want and then fills the textPane with that content
+	 */
 	private void getFile()
 	{
 		System.out.println("Attempting to get file list");
@@ -376,6 +384,9 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
+	/**
+	 * Opens a file after presenting the user with a JFileChooser
+	 */
 	private void openFile()
 	{
 		// change status
@@ -557,10 +568,11 @@ public class GUI implements ActionListener, KeyListener
 		}
 	}
 
-	// when key released, start idle timer
+	// after a key has been pressed, the file is no longer saved
 	public void keyReleased(KeyEvent e)
 	{
-		isSaved = false;
+		if (e.getKeyCode() != KeyEvent.VK_ENTER) // pressing enter doesn't make it un-saved (since pressing enter in file save prompt makes the file be considered non-saved)
+			isSaved = false;
 	}
 
 	// method required by KeyListener interface

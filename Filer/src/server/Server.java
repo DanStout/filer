@@ -12,6 +12,18 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Store files and respond to client requests
+ * 
+ * @author Nick Brooks
+ * @author George Faraj
+ * @author Andy Kenney
+ * @author George Sousa
+ * @author Daniel Stout
+ * 
+ * @version 2014/Apr/1
+ * 
+ */
 public class Server
 {
 
@@ -22,6 +34,9 @@ public class Server
 		new Server();
 	}
 
+	/**
+	 * Initiates the server
+	 */
 	public Server()
 	{
 		ServerSocket serverSocket;
@@ -43,15 +58,24 @@ public class Server
 		}
 	}
 
+	/**
+	 * Each client is assigned a thread
+	 */
 	class ClientThread implements Runnable
 	{
 		Socket clientSocket;
 
+		/**
+		 * Constructor for the thread
+		 *
+		 * @param clientSocket - the socket of the client
+		 */
 		public ClientThread(Socket clientSocket)
 		{
 			this.clientSocket = clientSocket;
 		}
 
+		// overridden from interface
 		public void run()
 		{
 			System.out.println("Server thread running");
@@ -64,8 +88,8 @@ public class Server
 				System.out.println("Attempting to read byte");
 				byte action = dis.readByte();
 				System.out.println("Action: " + action);
-				
-				//getting file from client
+
+				// getting file from client
 				if (action == 0)
 				{
 					FileOutputStream fos = new FileOutputStream("files\\" + dis.readUTF());
@@ -87,7 +111,7 @@ public class Server
 					bos.close();
 
 				}
-				//send file to client
+				// send file to client
 				else if (action == 1)
 				{
 
