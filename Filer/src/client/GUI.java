@@ -50,8 +50,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class GUI implements ActionListener, KeyListener
 {
 	// declarations
-	JFrame frame, aboutFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem;
+	JFrame frame, aboutFrame,assistFrame;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem,assistItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
 	File currentFile;
@@ -72,15 +72,44 @@ public class GUI implements ActionListener, KeyListener
 	{
 		if (aboutFrame == null)
 		{
+			
+			String text="<html><b>Filer is an application that was designed, using Java, to help users"
+				    +"\n<html><b>create documents, read them and save them locally or across a network."
+				    +"\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents."
+				    + "\n";
+			
+			JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
+	
+			/*
 			aboutFrame = new JFrame("About Filer");
 			aboutFrame.setLocationRelativeTo(frame);
 			aboutFrame.setSize(300, 200);
 			aboutFrame.setResizable(false);
 			aboutFrame.setVisible(true);
+			*/
 		}
 		else aboutFrame.toFront();
 	}
 
+	public void assistFrame()
+	{
+		if (assistFrame == null)
+		{
+			
+			JLabel label1 = new JLabel("Which is which",JLabel.CENTER);
+			assistFrame = new JFrame("About Filer");
+			assistFrame.setLocationRelativeTo(frame);
+			assistFrame.setSize(300, 200);
+			assistFrame.setResizable(false);
+			assistFrame.setVisible(true);
+			assistFrame.add(label1);
+			
+			
+		}
+		else assistFrame.toFront();
+	}
+
+	
 	/**
 	 * Initialize the frame JFrame
 	 */
@@ -170,14 +199,7 @@ public class GUI implements ActionListener, KeyListener
 		JMenu editMenu = new JMenu("Edit");
 
 		// populate menu button "edit"
-		undoItem = new JMenuItem("Undo");
-		undoItem.setAccelerator(KeyStroke.getKeyStroke('Z', KeyEvent.CTRL_DOWN_MASK));
-
-		redoItem = new JMenuItem("Redo");
-		redoItem.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
-
-		editMenu.add(undoItem);
-		editMenu.add(redoItem);
+		
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
@@ -195,9 +217,15 @@ public class GUI implements ActionListener, KeyListener
 
 		// helpMenu
 		JMenu helpMenu = new JMenu("Help");
+		
 		aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(this);
 		helpMenu.add(aboutItem);
+		
+		assistItem = new JMenuItem("How to...");
+		assistItem.addActionListener(this);
+		helpMenu.add(assistItem);
+
 
 		// add menus to menuBar
 		menuBar.add(fileMenu);
@@ -341,6 +369,10 @@ public class GUI implements ActionListener, KeyListener
 		else if (e.getSource() == aboutItem)
 		{
 			aboutFrame();
+		}
+		else if(e.getSource() == assistItem)
+		{
+			assistFrame();
 		}
 
 	}
