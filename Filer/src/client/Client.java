@@ -2,12 +2,16 @@ package client;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Communicates with the server
@@ -25,6 +29,7 @@ public class Client
 {
 	Socket socket;
 	InputStream is;
+	OutputStream os;
 	BufferedOutputStream bos;
 	DataOutputStream dos;
 	FileInputStream fis;
@@ -37,19 +42,13 @@ public class Client
 	 * @param hostname - hostname of server (IP address)
 	 * @param portnum - port of server (Should be above 1023 as below that are reserved)
 	 */
-	public Client(String hostname, int portnum)
+	public Client(String hostname, int portnum) throws Exception
 	{
-		try
-		{
-			socket = new Socket(hostname, portnum);
-			bos = new BufferedOutputStream(socket.getOutputStream());
-			dos = new DataOutputStream(bos);
-		}
-		catch (Exception e)
-		{
-			System.out.println("Unable to make connection");
-			e.printStackTrace();
-		}
+		socket = new Socket(hostname, portnum);
+		socket.setSoTimeout(1000);
+
+		dos = new DataOutputStream(socket.getOutputStream());
+		is = socket.getInputStream();
 	}
 
 	/**
@@ -64,31 +63,26 @@ public class Client
 			dos.writeByte(0);
 			dos.flush();
 
-			long fileSize = file.length();
-
-			byte[] buffer = new byte[(int) fileSize];
+			dos.writeUTF(file.getName());
+			dos.flush();
 
 			FileInputStream fis = new FileInputStream(file);
 			BufferedInputStream bis = new BufferedInputStream(fis);
 
 			int count;
 
-			dos.writeUTF(file.getName());
-			dos.flush();
+			byte[] buffer = new byte[(int) file.length()];
 
 			while ((count = bis.read(buffer)) > 0)
 			{
 				dos.write(buffer, 0, count);
 			}
-
-			System.out.print("File sent: ");
-			for (int i = 0; i < buffer.length; i++)
-			{
-				System.out.print((char) buffer[i]);
-			}
-
-			bos.close();
+			System.out.println(Arrays.toString(buffer));
+			dos.close();
 			bis.close();
+
+			System.out.println("File sent to server");
+
 		}
 		catch (Exception ex)
 		{
@@ -101,23 +95,14 @@ public class Client
 	 * 
 	 * @return an array of the names of the files on the server
 	 */
-	public String[] getFileList()
+	public String[] getFileList() throws Exception
 	{
 		File[] files = null;
+		dos.writeByte(1);
 
-		try
-		{
-			dos.writeByte(1);
-			dos.flush();
+		ois = new ObjectInputStream(socket.getInputStream());
 
-			ois = new ObjectInputStream(socket.getInputStream());
-
-			files = (File[]) ois.readObject();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		files = (File[]) ois.readObject();
 		String[] filenames = new String[files.length];
 
 		for (int i = 0; i < files.length; i++)
@@ -135,25 +120,26 @@ public class Client
 	 * @param filename - the name of the file selected
 	 * @return the contents of the file as a String
 	 */
-	public String getFileContents(String filename)
+	public String getFileContents(String filename) throws Exception
 	{
-		try
+		System.out.println(System.currentTimeMillis() + ": Getting " + filename);
+
+		// send the server the name of the file you want
+		dos.writeUTF(filename);
+
+		StringBuilder sb = new StringBuilder();
+
+		String line;
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+		while ((line = br.readLine()) != null)
 		{
-			dos.writeUTF(filename);
-			dos.flush();
-			System.out.println("getting: " + filename);
-
-			String contents = "";
-
-			System.out.println(ois.read());
-
-			return contents;
-
+			sb.append(line);
 		}
-		catch (Exception ex)
-		{
 
-		}
-		return "";
+		System.out.println("File written");
+
+		return sb.toString();
 	}
 }

@@ -50,8 +50,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class GUI implements ActionListener, KeyListener
 {
 	// declarations
-	JFrame frame, aboutFrame,assistFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem,assistItem;
+	JFrame frame, aboutFrame, assistFrame, fSizeChangeFrame;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem, fSizeItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
 	File currentFile;
@@ -68,25 +68,81 @@ public class GUI implements ActionListener, KeyListener
 	/**
 	 * Initialize the aboutFrame JFrame
 	 */
+	public void fSizeChangeFrame()
+	{
+		if (fSizeChangeFrame == null)
+		{
+
+			String fontsize = JOptionPane.showInputDialog("Change font size by entering a value below");
+			if (isInteger(fontsize))
+			{
+				int font_size = Integer.parseInt(fontsize);
+				if (font_size > 100)
+				{
+					JOptionPane.showMessageDialog(frame, "Maximum font size is 100", "Size Error", JOptionPane.WARNING_MESSAGE);
+				}
+
+				else if (font_size < 8)
+				{
+					JOptionPane.showMessageDialog(frame, "Minimum font size is 8", "Size Error", JOptionPane.WARNING_MESSAGE);
+				}
+
+				else
+				{
+					Font font = new Font("Arial", 10, font_size);
+					textPane.setFont(font);
+				}
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(frame, "The value for font size entered is invalid!", "Can't Change Size", JOptionPane.ERROR_MESSAGE);
+			}
+
+		}
+
+		else
+		{
+			fSizeChangeFrame.toFront();
+		}
+
+	}
+
+	/**
+	 * Check whether the passed string is an integer
+	 * 
+	 * @param s - String to check
+	 * @return true if integer, false otherwise
+	 */
+	public boolean isInteger(String s)
+	{
+		try
+		{
+			Integer.parseInt(s);
+			return true;
+		}
+		catch (NumberFormatException e)
+		{
+			return false;
+		}
+	}
+
 	public void aboutFrame()
 	{
 		if (aboutFrame == null)
 		{
-			
-			String text="<html><b>Filer is an application that was designed, using Java, to help users"
-				    +"\n<html><b>create documents, read them and save them locally or across a network."
-				    +"\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents."
-				    + "\n";
-			
+
+			String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents." + "\n";
+
 			JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
-	
-			/*
+
+			JLabel label1 = new JLabel(text);
 			aboutFrame = new JFrame("About Filer");
 			aboutFrame.setLocationRelativeTo(frame);
+			aboutFrame.add(label1);
 			aboutFrame.setSize(300, 200);
 			aboutFrame.setResizable(false);
 			aboutFrame.setVisible(true);
-			*/
+
 		}
 		else aboutFrame.toFront();
 	}
@@ -95,21 +151,19 @@ public class GUI implements ActionListener, KeyListener
 	{
 		if (assistFrame == null)
 		{
-			
-			JLabel label1 = new JLabel("Which is which",JLabel.CENTER);
+
+			JLabel label1 = new JLabel("Which is which", JLabel.CENTER);
 			assistFrame = new JFrame("About Filer");
 			assistFrame.setLocationRelativeTo(frame);
 			assistFrame.setSize(300, 200);
 			assistFrame.setResizable(false);
 			assistFrame.setVisible(true);
 			assistFrame.add(label1);
-			
-			
+
 		}
 		else assistFrame.toFront();
 	}
 
-	
 	/**
 	 * Initialize the frame JFrame
 	 */
@@ -199,7 +253,9 @@ public class GUI implements ActionListener, KeyListener
 		JMenu editMenu = new JMenu("Edit");
 
 		// populate menu button "edit"
-		
+		fSizeItem = new JMenuItem("Font Size");
+		fSizeItem.addActionListener(this);
+		editMenu.add(fSizeItem);
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
@@ -217,15 +273,14 @@ public class GUI implements ActionListener, KeyListener
 
 		// helpMenu
 		JMenu helpMenu = new JMenu("Help");
-		
+
 		aboutItem = new JMenuItem("About");
 		aboutItem.addActionListener(this);
 		helpMenu.add(aboutItem);
-		
+
 		assistItem = new JMenuItem("How to...");
 		assistItem.addActionListener(this);
 		helpMenu.add(assistItem);
-
 
 		// add menus to menuBar
 		menuBar.add(fileMenu);
@@ -289,6 +344,7 @@ public class GUI implements ActionListener, KeyListener
 		public void run()
 		{
 			updateStatus("Idle");
+			updateWordLabel();
 		}
 	}
 
@@ -370,9 +426,13 @@ public class GUI implements ActionListener, KeyListener
 		{
 			aboutFrame();
 		}
-		else if(e.getSource() == assistItem)
+		else if (e.getSource() == assistItem)
 		{
 			assistFrame();
+		}
+		else if (e.getSource() == fSizeItem)
+		{
+			fSizeChangeFrame();
 		}
 
 	}
@@ -382,8 +442,27 @@ public class GUI implements ActionListener, KeyListener
 	 */
 	private void sendFile()
 	{
-		client = new Client(host, port);
-		if (saveCheck() && currentFile != null) client.sendFile(currentFile);
+		if (initClient() && (saveCheck() && currentFile != null)) client.sendFile(currentFile);
+	}
+
+	/**
+	 * Attempts to initiate the client. If
+	 * 
+	 * @return true if the client was successfully initiated, false otherwise
+	 */
+	private boolean initClient()
+	{
+		try
+		{
+			client = new Client(host, port);
+			return true;
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			showErrorMessage("Unable to connect to server");
+			return false;
+		}
 	}
 
 	/**
@@ -392,13 +471,31 @@ public class GUI implements ActionListener, KeyListener
 	private void getFile()
 	{
 		System.out.println("Attempting to get file list");
-		client = new Client(host, port);
-		String[] files = client.getFileList();
+		if (initClient())
+		{
 
-		String chosenFile = (String) JOptionPane.showInputDialog(frame, "Which file would you like to retrieve?", "Choose a file", JOptionPane.QUESTION_MESSAGE, null, files, files[0]);
+			try
+			{
+				String[] files = client.getFileList();
+				String chosenFile = (String) JOptionPane.showInputDialog(frame, "Which file would you like to retrieve?", "Choose a file", JOptionPane.QUESTION_MESSAGE, null, files, files[0]);
+				textPane.setText(client.getFileContents(chosenFile));
+			}
+			catch (Exception ex)
+			{
+				showErrorMessage("Unable to fetch file");
+				ex.printStackTrace();
+			}
+		}
+	}
 
-		textPane.setText(client.getFileContents(chosenFile));
-
+	/**
+	 * Utility method for error JOPtionPanes
+	 * 
+	 * @param msg - message to display
+	 */
+	public void showErrorMessage(String msg)
+	{
+		JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
