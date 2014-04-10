@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,6 +35,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.undo.UndoManager;
 
 /**
  * Create the GUI, and handle events
@@ -50,122 +52,25 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class GUI implements ActionListener, KeyListener
 {
 	// declarations
-	JFrame frame, aboutFrame, assistFrame, fSizeChangeFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem, fSizeItem;
+	JFrame frame, aboutFrame, assistFrame, fontSizeFrame;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem, fontSizeItem;
+	JCheckBoxMenuItem autoSaveItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
 	File currentFile;
 	JPanel statusBar;
 	String status = "Idle";
-	JLabel statusLabel, wordCountLabel;
-	boolean isSaved = true;
+	JLabel statusLabel, wordCountLabel, charCountLabel;
+	boolean isSaved = true, autoSaveEnabled = true;
 	Timer timer;
 	Client client;
+	UndoManager undoManager;
 
 	int port = 10500;
 	String host = "127.0.0.1";
 
 	/**
-	 * Initialize the aboutFrame JFrame
-	 */
-	public void fSizeChangeFrame()
-	{
-		if (fSizeChangeFrame == null)
-		{
-
-			String fontsize = JOptionPane.showInputDialog("Change font size by entering a value below");
-			if (isInteger(fontsize))
-			{
-				int font_size = Integer.parseInt(fontsize);
-				if (font_size > 100)
-				{
-					JOptionPane.showMessageDialog(frame, "Maximum font size is 100", "Size Error", JOptionPane.WARNING_MESSAGE);
-				}
-
-				else if (font_size < 8)
-				{
-					JOptionPane.showMessageDialog(frame, "Minimum font size is 8", "Size Error", JOptionPane.WARNING_MESSAGE);
-				}
-
-				else
-				{
-					Font font = new Font("Arial", 10, font_size);
-					textPane.setFont(font);
-				}
-			}
-			else
-			{
-				JOptionPane.showMessageDialog(frame, "The value for font size entered is invalid!", "Can't Change Size", JOptionPane.ERROR_MESSAGE);
-			}
-
-		}
-
-		else
-		{
-			fSizeChangeFrame.toFront();
-		}
-
-	}
-
-	/**
-	 * Check whether the passed string is an integer
-	 * 
-	 * @param s - String to check
-	 * @return true if integer, false otherwise
-	 */
-	public boolean isInteger(String s)
-	{
-		try
-		{
-			Integer.parseInt(s);
-			return true;
-		}
-		catch (NumberFormatException e)
-		{
-			return false;
-		}
-	}
-
-	public void aboutFrame()
-	{
-		if (aboutFrame == null)
-		{
-
-			String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents." + "\n";
-
-			JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
-
-			JLabel label1 = new JLabel(text);
-			aboutFrame = new JFrame("About Filer");
-			aboutFrame.setLocationRelativeTo(frame);
-			aboutFrame.add(label1);
-			aboutFrame.setSize(300, 200);
-			aboutFrame.setResizable(false);
-			aboutFrame.setVisible(true);
-
-		}
-		else aboutFrame.toFront();
-	}
-
-	public void assistFrame()
-	{
-		if (assistFrame == null)
-		{
-
-			JLabel label1 = new JLabel("Which is which", JLabel.CENTER);
-			assistFrame = new JFrame("About Filer");
-			assistFrame.setLocationRelativeTo(frame);
-			assistFrame.setSize(300, 200);
-			assistFrame.setResizable(false);
-			assistFrame.setVisible(true);
-			assistFrame.add(label1);
-
-		}
-		else assistFrame.toFront();
-	}
-
-	/**
-	 * Initialize the frame JFrame
+	 * Initializes the primary JFrame
 	 */
 	public GUI()
 	{
@@ -190,7 +95,8 @@ public class GUI implements ActionListener, KeyListener
 		// as wide as the frame, and 20 pixels tall
 		statusBar.setPreferredSize(new Dimension(frame.getWidth(), 20));
 		statusLabel = new JLabel("Status: Idle");
-		wordCountLabel = new JLabel("Words: 0");
+		wordCountLabel = new JLabel();
+		charCountLabel = new JLabel();
 
 		// populate the status bar
 		statusBar.add(Box.createHorizontalStrut(10));
@@ -199,6 +105,10 @@ public class GUI implements ActionListener, KeyListener
 		statusBar.add(new JLabel("|"));
 		statusBar.add(Box.createHorizontalStrut(10));
 		statusBar.add(wordCountLabel);
+		statusBar.add(Box.createHorizontalStrut(10));
+		statusBar.add(new JLabel("|"));
+		statusBar.add(Box.createHorizontalStrut(10));
+		statusBar.add(charCountLabel);
 
 		// adds the status bar to the frame on the south side (bottom)
 		frame.add(statusBar, BorderLayout.SOUTH);
@@ -213,6 +123,9 @@ public class GUI implements ActionListener, KeyListener
 		// create scroll pane and put the text pane into it
 		JScrollPane scrollPane = new JScrollPane(textPane);
 		frame.add(scrollPane);
+
+		undoManager = new UndoManager();
+		textPane.getDocument().addUndoableEditListener(undoManager);
 
 		// create menu bar
 		JMenuBar menuBar = new JMenuBar();
@@ -236,6 +149,10 @@ public class GUI implements ActionListener, KeyListener
 		saveAsItem.addActionListener(this);
 		saveAsItem.setAccelerator(KeyStroke.getKeyStroke('S', KeyEvent.CTRL_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK));
 
+		autoSaveItem = new JCheckBoxMenuItem("Enable Auto-Save on idle");
+		autoSaveItem.setSelected(true);
+		autoSaveItem.addActionListener(this);
+
 		exitItem = new JMenuItem("Exit");
 		exitItem.addActionListener(this);
 		exitItem.setAccelerator(KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK));
@@ -246,16 +163,28 @@ public class GUI implements ActionListener, KeyListener
 		fileMenu.addSeparator();
 		fileMenu.add(saveItem);
 		fileMenu.add(saveAsItem);
+		fileMenu.add(autoSaveItem);
 		fileMenu.addSeparator();
 		fileMenu.add(exitItem);
 
 		// editMenu
 		JMenu editMenu = new JMenu("Edit");
 
-		// populate menu button "edit"
-		fSizeItem = new JMenuItem("Font Size");
-		fSizeItem.addActionListener(this);
-		editMenu.add(fSizeItem);
+		undoItem = new JMenuItem("Undo");
+		undoItem.addActionListener(this);
+		undoItem.setAccelerator(KeyStroke.getKeyStroke('Z', KeyEvent.CTRL_DOWN_MASK));
+
+		redoItem = new JMenuItem("Redo");
+		redoItem.addActionListener(this);
+		redoItem.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
+
+		fontSizeItem = new JMenuItem("Font Size");
+		fontSizeItem.addActionListener(this);
+
+		editMenu.add(undoItem);
+		editMenu.add(redoItem);
+		editMenu.addSeparator();
+		editMenu.add(fontSizeItem);
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
@@ -278,7 +207,7 @@ public class GUI implements ActionListener, KeyListener
 		aboutItem.addActionListener(this);
 		helpMenu.add(aboutItem);
 
-		assistItem = new JMenuItem("How to...");
+		assistItem = new JMenuItem("How to use Filer");
 		assistItem.addActionListener(this);
 		helpMenu.add(assistItem);
 
@@ -316,6 +245,112 @@ public class GUI implements ActionListener, KeyListener
 		// timer for use in determining when the program is idle
 		timer = new Timer();
 
+		// initialized as blank. If opening files before starting the program is added, this will be necessary.
+		updateCountLabels();
+	}
+
+	/**
+	 * Initialize the aboutFrame JFrame
+	 */
+	public void fontSizeFrame()
+	{
+		if (fontSizeFrame == null)
+		{
+			String fontsize = JOptionPane.showInputDialog("Change font size by entering a value below");
+			if (isInteger(fontsize))
+			{
+				int font_size = Integer.parseInt(fontsize);
+				if (font_size > 100)
+				{
+					JOptionPane.showMessageDialog(frame, "Maximum font size is 100", "Size Error", JOptionPane.WARNING_MESSAGE);
+				}
+
+				else if (font_size < 8)
+				{
+					JOptionPane.showMessageDialog(frame, "Minimum font size is 8", "Size Error", JOptionPane.WARNING_MESSAGE);
+				}
+
+				else
+				{
+					Font font = new Font("Arial", 10, font_size);
+					textPane.setFont(font);
+				}
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(frame, "The value for font size entered is invalid!", "Can't Change Size", JOptionPane.ERROR_MESSAGE);
+			}
+
+		}
+
+		else
+		{
+			fontSizeFrame.toFront();
+		}
+
+	}
+
+	/**
+	 * Check whether the passed string is an integer
+	 * 
+	 * @param s - String to check
+	 * @return true if integer, false otherwise
+	 */
+	public boolean isInteger(String s)
+	{
+		try
+		{
+			Integer.parseInt(s);
+			return true;
+		}
+		catch (NumberFormatException e)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Creates a JFrame containing information regarding the program
+	 */
+	public void aboutFrame()
+	{
+		if (aboutFrame == null)
+		{
+
+			String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents." + "\n";
+
+			JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
+
+			JLabel label1 = new JLabel(text);
+			aboutFrame = new JFrame("About Filer");
+			aboutFrame.setLocationRelativeTo(frame);
+			aboutFrame.add(label1);
+			aboutFrame.setSize(300, 200);
+			aboutFrame.setResizable(false);
+			aboutFrame.setVisible(true);
+
+		}
+		else aboutFrame.toFront();
+	}
+
+	/**
+	 * Creates a JFrame containing information regarding the usage of the program
+	 */
+	public void assistFrame()
+	{
+		if (assistFrame == null)
+		{
+
+			JLabel label1 = new JLabel("Which is which", JLabel.CENTER);
+			assistFrame = new JFrame("About Filer");
+			assistFrame.setLocationRelativeTo(frame);
+			assistFrame.setSize(300, 200);
+			assistFrame.setResizable(false);
+			assistFrame.setVisible(true);
+			assistFrame.add(label1);
+
+		}
+		else assistFrame.toFront();
 	}
 
 	/**
@@ -343,8 +378,9 @@ public class GUI implements ActionListener, KeyListener
 	{
 		public void run()
 		{
-			updateStatus("Idle");
-			updateWordLabel();
+			// if the user has stopped typing, has enabled auto-saving and the file has a destination, save.
+			if (autoSaveEnabled && currentFile != null && !isSaved) saveFile();
+			else updateStatus("Idle");
 		}
 	}
 
@@ -373,7 +409,7 @@ public class GUI implements ActionListener, KeyListener
 	public boolean saveCheck()
 	{
 		boolean isDone = true;
-		// isSaved boolean is updated through out the program
+		// isSaved boolean becomes false when the user types
 		if (!isSaved)
 		{
 			// dialog box appears to prompt user
@@ -390,7 +426,7 @@ public class GUI implements ActionListener, KeyListener
 		return isDone;
 	}
 
-	// responds to button presses by the user
+	// call appropriate methods based on menu item events
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == sendFileItem)
@@ -430,9 +466,21 @@ public class GUI implements ActionListener, KeyListener
 		{
 			assistFrame();
 		}
-		else if (e.getSource() == fSizeItem)
+		else if (e.getSource() == fontSizeItem)
 		{
-			fSizeChangeFrame();
+			fontSizeFrame();
+		}
+		else if (e.getSource() == undoItem)
+		{
+			if (undoManager.canUndo()) undoManager.undo();
+		}
+		else if (e.getSource() == redoItem)
+		{
+			if (undoManager.canRedo()) undoManager.redo();
+		}
+		else if (e.getSource() == autoSaveItem)
+		{
+			autoSaveEnabled = !autoSaveEnabled;
 		}
 
 	}
@@ -442,11 +490,23 @@ public class GUI implements ActionListener, KeyListener
 	 */
 	private void sendFile()
 	{
-		if (initClient() && (saveCheck() && currentFile != null)) client.sendFile(currentFile);
+		if (!textPane.getText().isEmpty() && initClient() && (saveCheck() && currentFile != null))
+		{
+			try
+			{
+				client.sendFile(currentFile);
+				updateStatus(currentFile.getName() + " sent to server sucessfully");
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				showErrorMessage("Unable to send file");
+			}
+		}
 	}
 
 	/**
-	 * Attempts to initiate the client. If
+	 * Attempts to initiate the client
 	 * 
 	 * @return true if the client was successfully initiated, false otherwise
 	 */
@@ -478,7 +538,10 @@ public class GUI implements ActionListener, KeyListener
 			{
 				String[] files = client.getFileList();
 				String chosenFile = (String) JOptionPane.showInputDialog(frame, "Which file would you like to retrieve?", "Choose a file", JOptionPane.QUESTION_MESSAGE, null, files, files[0]);
-				textPane.setText(client.getFileContents(chosenFile));
+				if (chosenFile != null)
+				{
+					setTextPaneContents(client.getFileContents(chosenFile));
+				}
 			}
 			catch (Exception ex)
 			{
@@ -486,6 +549,17 @@ public class GUI implements ActionListener, KeyListener
 				ex.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * Sets the textPane contents and updates word count
+	 * 
+	 * @param s - text to set
+	 */
+	public void setTextPaneContents(String s)
+	{
+		textPane.setText(s);
+		updateCountLabels();
 	}
 
 	/**
@@ -507,7 +581,7 @@ public class GUI implements ActionListener, KeyListener
 		startTimer(3000);
 		if (saveCheck())
 		{
-			textPane.setText("");
+			setTextPaneContents("");
 			updateStatus("New File Created");
 			frame.setTitle("Filer - Untitled.txt");
 		}
@@ -609,7 +683,7 @@ public class GUI implements ActionListener, KeyListener
 			{
 				contents += (l + "\r\n"); // \n required for newlines, \r (carriage return) required for notepad
 			}
-			textPane.setText(contents);
+			setTextPaneContents(contents);
 			updateStatus(file.getName() + " opened sucessfully");
 			frame.setTitle("Filer - " + file.getName());
 		}
@@ -668,11 +742,12 @@ public class GUI implements ActionListener, KeyListener
 	}
 
 	/**
-	 * Update the wordCountLabel
+	 * Update the wordCountLabel and charCountLabels
 	 */
-	private void updateWordLabel()
+	private void updateCountLabels()
 	{
 		wordCountLabel.setText("Words: " + findWordCount());
+		charCountLabel.setText("Characters: " + textPane.getText().length());
 	}
 
 	/**
@@ -682,24 +757,23 @@ public class GUI implements ActionListener, KeyListener
 	 */
 	private int findWordCount()
 	{
-		return textPane.getText().split("\\s+").length;
+		String content = textPane.getText().trim();
+
+		// if the content is just 0+ whitespace, return 0. Otherwise, split it based on the regex for 1+ whitespace and return the number of items
+		return content.matches("\\s*") ? 0 : content.split("\\s+").length;
 	}
 
-	// detects if the user is typing
+	// on each keypress, set the status to typing and start the idle timer
 	public void keyPressed(KeyEvent e)
 	{
 		updateStatus("Typing");
 		startTimer(800);
-		// update the wordCountLabel when space is pressed (new word)
-		if (e.getKeyCode() == KeyEvent.VK_SPACE)
-		{
-			updateWordLabel();
-		}
 	}
 
 	// after a key has been pressed, the file is no longer saved
 	public void keyReleased(KeyEvent e)
 	{
+		updateCountLabels();
 		if (e.getKeyCode() != KeyEvent.VK_ENTER) // pressing enter doesn't make it un-saved (since pressing enter in file save prompt makes the file be considered non-saved)
 			isSaved = false;
 	}

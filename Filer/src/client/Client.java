@@ -56,38 +56,31 @@ public class Client
 	 * 
 	 * @param file - the file to send
 	 */
-	public void sendFile(File file)
+	public void sendFile(File file) throws Exception
 	{
-		try
+		dos.writeByte(0);
+		dos.flush();
+
+		dos.writeUTF(file.getName());
+		dos.flush();
+
+		FileInputStream fis = new FileInputStream(file);
+		BufferedInputStream bis = new BufferedInputStream(fis);
+
+		int count;
+
+		byte[] buffer = new byte[(int) file.length()];
+
+		while ((count = bis.read(buffer)) > 0)
 		{
-			dos.writeByte(0);
-			dos.flush();
-
-			dos.writeUTF(file.getName());
-			dos.flush();
-
-			FileInputStream fis = new FileInputStream(file);
-			BufferedInputStream bis = new BufferedInputStream(fis);
-
-			int count;
-
-			byte[] buffer = new byte[(int) file.length()];
-
-			while ((count = bis.read(buffer)) > 0)
-			{
-				dos.write(buffer, 0, count);
-			}
-			System.out.println(Arrays.toString(buffer));
-			dos.close();
-			bis.close();
-
-			System.out.println("File sent to server");
-
+			dos.write(buffer, 0, count);
 		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
+		System.out.println(Arrays.toString(buffer));
+		dos.close();
+		bis.close();
+
+		System.out.println("File sent to server");
+
 	}
 
 	/**
