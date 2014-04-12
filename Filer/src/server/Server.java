@@ -12,7 +12,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 
 /**
  * Store files and respond to client requests
@@ -46,11 +45,12 @@ public class Server
 		try
 		{
 			serverSocket = new ServerSocket(portnum);
-			while (true)
+			while (true) // wait for clients forever
 			{
 				Socket socket = serverSocket.accept();
 				System.out.println("Connected to client" + socket.getInetAddress() + " on " + socket.getPort());
 
+				// create a new thread and pass it the socket that was just started, then start the thread
 				new Thread(new ClientThread(socket)).start();
 			}
 		}
@@ -64,8 +64,9 @@ public class Server
 	/**
 	 * Each client is assigned a thread
 	 */
-	class ClientThread implements Runnable
+	private class ClientThread implements Runnable
 	{
+		// thread instance variables
 		Socket clientSocket;
 		OutputStream os;
 		InputStream is;
@@ -87,19 +88,41 @@ public class Server
 			{
 				System.out.println("Server thread running");
 
+				// init streams
 				is = clientSocket.getInputStream();
 				os = clientSocket.getOutputStream();
 
 				DataInputStream dis = new DataInputStream(is);
 
+				// read action from client
 				byte action = dis.readByte();
 				System.out.println(System.currentTimeMillis() + ": Action recieved = " + action);
 
 				// get the file from the client
 				if (action == 0)
 				{
-					FileOutputStream fos = new FileOutputStream("files\\" + dis.readUTF());
+					String fullName = dis.readUTF();
 
+					// dealing with duplicates
+					int dotIndex = fullName.indexOf('.');
+					String fileName = fullName.substring(0, dotIndex);
+					String ext = fullName.substring(dotIndex);
+
+					int i = 1;
+					while (new File("files\\" + fileName + ext).exists())
+					{
+						if (i == 1) fileName += "(1)";
+						else
+						{
+							fileName = fileName.substring(0, fileName.length() - 2) + i + ")";
+						}
+						i++;
+					}
+
+					// create a FileOutputStream which saves a file with the name read from the client inside the "files" folder on the server
+					FileOutputStream fos = new FileOutputStream("files\\" + fileName + ext);
+
+					// reading the bytes from the client and writing them to the file
 					int bufferSize = clientSocket.getReceiveBufferSize();
 					byte[] buffer = new byte[bufferSize];
 
@@ -110,26 +133,28 @@ public class Server
 					}
 					System.out.println("File written");
 
-					fos.flush();
 					fos.close();
 
 				}
 				// send file to client
 				else if (action == 1)
 				{
+					// create an ObjectOutputStream
 					ObjectOutputStream oos = new ObjectOutputStream(os);
+
+					// write the array of all the files in the "files" folder to the client
 					oos.writeObject(new File("files\\").listFiles());
 
-					System.out.println("List of files sent to client");
+					System.out.println("Sent list of files to client");
 
 					System.out.println(System.currentTimeMillis() + ": reading filename");
+
 					// make a filepath with the path retrieved from the DataInputStream
 					File file = new File("files\\" + dis.readUTF());
 
 					System.out.println("Reading " + file.getName());
 
-					// load the above file from inside the "files" folder
-
+					// read the file on the server and send the bytes to the client
 					FileInputStream fis = new FileInputStream(file);
 					BufferedInputStream bis = new BufferedInputStream(fis);
 
@@ -144,7 +169,7 @@ public class Server
 						dos.write(buffer, 0, count);
 					}
 
-					System.out.println(Arrays.toString(buffer));
+					// close streams
 					dos.close();
 					bis.close();
 

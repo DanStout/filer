@@ -328,23 +328,9 @@ public class GUI implements ActionListener, DocumentListener
 	 */
 	public void aboutFrame()
 	{
-		if (aboutFrame == null)
-		{
+		String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents." + "\n";
 
-			String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents." + "\n";
-
-			JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
-
-			JLabel label1 = new JLabel(text);
-			aboutFrame = new JFrame("About Filer");
-			aboutFrame.setLocationRelativeTo(frame);
-			aboutFrame.add(label1);
-			aboutFrame.setSize(300, 200);
-			aboutFrame.setResizable(false);
-			aboutFrame.setVisible(true);
-
-		}
-		else aboutFrame.toFront();
+		JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
 	}
 
 	/**
@@ -352,20 +338,7 @@ public class GUI implements ActionListener, DocumentListener
 	 */
 	public void assistFrame()
 	{
-		if (assistFrame == null)
-		{
-
-			// note about only being able to send saved files
-			JLabel label1 = new JLabel("Which is which", JLabel.CENTER);
-			assistFrame = new JFrame("About Filer");
-			assistFrame.setLocationRelativeTo(frame);
-			assistFrame.setSize(300, 200);
-			assistFrame.setResizable(false);
-			assistFrame.setVisible(true);
-			assistFrame.add(label1);
-
-		}
-		else assistFrame.toFront();
+		JOptionPane.showMessageDialog(frame, "How to use filer", "How to use Filer", JOptionPane.PLAIN_MESSAGE);
 	}
 
 	/**
