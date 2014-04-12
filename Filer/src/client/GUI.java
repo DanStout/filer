@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -21,6 +20,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -34,6 +34,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.undo.UndoManager;
 
@@ -49,7 +51,7 @@ import javax.swing.undo.UndoManager;
  * @version 2014/Apr/1
  * 
  */
-public class GUI implements ActionListener, KeyListener
+public class GUI implements ActionListener, DocumentListener
 {
 	// declarations
 	JFrame frame, aboutFrame, assistFrame, fontSizeFrame;
@@ -60,13 +62,15 @@ public class GUI implements ActionListener, KeyListener
 	File currentFile;
 	JPanel statusBar;
 	String status = "Idle";
-	JLabel statusLabel, wordCountLabel, charCountLabel;
+	JLabel statusLabel, wordCountLabel, charCountLabel, savedLabel;
 	boolean isSaved = true, autoSaveEnabled = true;
 	Timer timer;
 	Client client;
 	UndoManager undoManager;
 
 	int port = 10500;
+	// String host = "162.243.79.40";
+
 	String host = "127.0.0.1";
 
 	/**
@@ -97,6 +101,7 @@ public class GUI implements ActionListener, KeyListener
 		statusLabel = new JLabel("Status: Idle");
 		wordCountLabel = new JLabel();
 		charCountLabel = new JLabel();
+		savedLabel = new JLabel();
 
 		// populate the status bar
 		statusBar.add(Box.createHorizontalStrut(10));
@@ -109,6 +114,10 @@ public class GUI implements ActionListener, KeyListener
 		statusBar.add(new JLabel("|"));
 		statusBar.add(Box.createHorizontalStrut(10));
 		statusBar.add(charCountLabel);
+		statusBar.add(Box.createHorizontalStrut(10));
+		statusBar.add(new JLabel("|"));
+		statusBar.add(Box.createHorizontalStrut(10));
+		statusBar.add(savedLabel);
 
 		// adds the status bar to the frame on the south side (bottom)
 		frame.add(statusBar, BorderLayout.SOUTH);
@@ -116,7 +125,7 @@ public class GUI implements ActionListener, KeyListener
 		// textPane
 		textPane = new JTextPane();
 		// add KeyListener to keep track of whether the user is typing and spacebar presses
-		textPane.addKeyListener(this);
+		textPane.getDocument().addDocumentListener(this);
 		// set font
 		Font font = new Font("Arial", 10, 16);
 		textPane.setFont(font);
@@ -247,6 +256,11 @@ public class GUI implements ActionListener, KeyListener
 
 		// initialized as blank. If opening files before starting the program is added, this will be necessary.
 		updateCountLabels();
+		updateSavedLabel();
+
+		ImageIcon logo = new ImageIcon("filer.png");
+
+		frame.setIconImage(logo.getImage());
 	}
 
 	/**
@@ -341,6 +355,7 @@ public class GUI implements ActionListener, KeyListener
 		if (assistFrame == null)
 		{
 
+			// note about only being able to send saved files
 			JLabel label1 = new JLabel("Which is which", JLabel.CENTER);
 			assistFrame = new JFrame("About Filer");
 			assistFrame.setLocationRelativeTo(frame);
@@ -371,6 +386,11 @@ public class GUI implements ActionListener, KeyListener
 		statusLabel.setText("Status: " + newStatus);
 	}
 
+	private void updateSavedLabel()
+	{
+		savedLabel.setText("Saved: " + isSaved);
+	}
+
 	/**
 	 * When the TimerTask runs, update the status to be "Idle"
 	 */
@@ -381,6 +401,7 @@ public class GUI implements ActionListener, KeyListener
 			// if the user has stopped typing, has enabled auto-saving and the file has a destination, save.
 			if (autoSaveEnabled && currentFile != null && !isSaved) saveFile();
 			else updateStatus("Idle");
+			updateSavedLabel();
 		}
 	}
 
@@ -490,18 +511,25 @@ public class GUI implements ActionListener, KeyListener
 	 */
 	private void sendFile()
 	{
-		if (!textPane.getText().isEmpty() && initClient() && (saveCheck() && currentFile != null))
+		if (!textPane.getText().isEmpty())
 		{
-			try
+			if (initClient() && (saveCheck() && currentFile != null))
 			{
-				client.sendFile(currentFile);
-				updateStatus(currentFile.getName() + " sent to server sucessfully");
+				try
+				{
+					client.sendFile(currentFile);
+					updateStatus(currentFile.getName() + " sent to server sucessfully");
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					showErrorMessage("Unable to send file");
+				}
 			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				showErrorMessage("Unable to send file");
-			}
+		}
+		else
+		{
+			showErrorMessage("Why would you want to back up an empty file?");
 		}
 	}
 
@@ -537,10 +565,17 @@ public class GUI implements ActionListener, KeyListener
 			try
 			{
 				String[] files = client.getFileList();
-				String chosenFile = (String) JOptionPane.showInputDialog(frame, "Which file would you like to retrieve?", "Choose a file", JOptionPane.QUESTION_MESSAGE, null, files, files[0]);
-				if (chosenFile != null)
+				if (files.length != 0)
 				{
-					setTextPaneContents(client.getFileContents(chosenFile));
+					String chosenFile = (String) JOptionPane.showInputDialog(frame, "Which file would you like to retrieve?", "Choose a file", JOptionPane.QUESTION_MESSAGE, null, files, files[0]);
+					if (chosenFile != null)
+					{
+						setTextPaneContents(client.getFileContents(chosenFile));
+					}
+				}
+				else
+				{
+					showErrorMessage("No files stored");
 				}
 			}
 			catch (Exception ex)
@@ -757,30 +792,34 @@ public class GUI implements ActionListener, KeyListener
 	 */
 	private int findWordCount()
 	{
-		String content = textPane.getText().trim();
+		String content = textPane.getText().trim(); // trim is necessary because leading/trailing whitespace can affect the wordcount
 
 		// if the content is just 0+ whitespace, return 0. Otherwise, split it based on the regex for 1+ whitespace and return the number of items
 		return content.matches("\\s*") ? 0 : content.split("\\s+").length;
 	}
 
-	// on each keypress, set the status to typing and start the idle timer
-	public void keyPressed(KeyEvent e)
+	public void changedUpdate(DocumentEvent e)
 	{
+	}
+
+	public void insertUpdate(DocumentEvent e)
+	{
+		changeActions();
 		updateStatus("Typing");
+	}
+
+	public void removeUpdate(DocumentEvent e)
+	{
+		changeActions();
+		updateStatus("Deleting");
+	}
+
+	private void changeActions()
+	{
 		startTimer(800);
-	}
-
-	// after a key has been pressed, the file is no longer saved
-	public void keyReleased(KeyEvent e)
-	{
+		isSaved = false;
 		updateCountLabels();
-		if (e.getKeyCode() != KeyEvent.VK_ENTER) // pressing enter doesn't make it un-saved (since pressing enter in file save prompt makes the file be considered non-saved)
-			isSaved = false;
-	}
-
-	// method required by KeyListener interface
-	public void keyTyped(KeyEvent e)
-	{
+		updateSavedLabel();
 	}
 
 }

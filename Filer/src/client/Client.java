@@ -96,15 +96,20 @@ public class Client
 		ois = new ObjectInputStream(socket.getInputStream());
 
 		files = (File[]) ois.readObject();
-		String[] filenames = new String[files.length];
 
-		for (int i = 0; i < files.length; i++)
+		if (files != null)
 		{
-			filenames[i] = files[i].getName();
-		}
+			String[] filenames = new String[files.length];
 
-		System.out.println("File list received");
-		return filenames;
+			for (int i = 0; i < files.length; i++)
+			{
+				filenames[i] = files[i].getName();
+			}
+
+			System.out.println("File list received");
+			return filenames;
+		}
+		else throw new Exception();
 	}
 
 	/**
