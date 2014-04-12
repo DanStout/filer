@@ -486,7 +486,7 @@ public class GUI implements ActionListener, DocumentListener
 	{
 		if (!textPane.getText().isEmpty())
 		{
-			if (initClient() && (saveCheck() && currentFile != null))
+			if (currentFile != null && saveCheck() && initClient())
 			{
 				try
 				{
@@ -498,6 +498,10 @@ public class GUI implements ActionListener, DocumentListener
 					e.printStackTrace();
 					showErrorMessage("Unable to send file");
 				}
+			}
+			else
+			{
+				showErrorMessage("You must save the file before you can send it");
 			}
 		}
 		else
@@ -567,6 +571,7 @@ public class GUI implements ActionListener, DocumentListener
 	public void setTextPaneContents(String s)
 	{
 		textPane.setText(s);
+		isSaved = false;
 		updateCountLabels();
 	}
 
