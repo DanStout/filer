@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -30,6 +31,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
@@ -55,7 +57,7 @@ public class GUI implements ActionListener, DocumentListener
 {
 	// declarations
 	JFrame frame, aboutFrame, assistFrame, fontSizeFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem, fontSizeItem;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem,fontSizeItem,arialItem,courierItem,helveticaItem,serifItem;
 	JCheckBoxMenuItem autoSaveItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
@@ -67,6 +69,8 @@ public class GUI implements ActionListener, DocumentListener
 	Timer timer;
 	Client client;
 	UndoManager undoManager;
+	static int FONT_SIZE = 16;
+	static String STYLE = "Arial";
 
 	int port = 10500;
 	// String host = "162.243.79.40";
@@ -127,7 +131,7 @@ public class GUI implements ActionListener, DocumentListener
 		// add KeyListener to keep track of whether the user is typing and spacebar presses
 		textPane.getDocument().addDocumentListener(this);
 		// set font
-		Font font = new Font("Arial", 10, 16);
+		Font font = new Font(STYLE, 10, FONT_SIZE);
 		textPane.setFont(font);
 		// create scroll pane and put the text pane into it
 		JScrollPane scrollPane = new JScrollPane(textPane);
@@ -187,13 +191,32 @@ public class GUI implements ActionListener, DocumentListener
 		redoItem.addActionListener(this);
 		redoItem.setAccelerator(KeyStroke.getKeyStroke('Y', KeyEvent.CTRL_DOWN_MASK));
 
-		fontSizeItem = new JMenuItem("Font Size");
-		fontSizeItem.addActionListener(this);
-
 		editMenu.add(undoItem);
 		editMenu.add(redoItem);
-		editMenu.addSeparator();
-		editMenu.add(fontSizeItem);
+		
+		// fontMenu
+		JMenu fontMenu = new JMenu("Font");
+		
+		fontSizeItem = new JMenuItem("Font Size");
+		fontSizeItem.addActionListener(this);
+		
+		fontMenu.add(arialItem = new JRadioButtonMenuItem("Arial", true));
+		arialItem.addActionListener(this);
+	    fontMenu.add(helveticaItem = new JRadioButtonMenuItem("Helvetica", false));
+	    helveticaItem.addActionListener(this);
+	    fontMenu.add(courierItem = new JRadioButtonMenuItem("Courier", false));
+	    courierItem.addActionListener(this);
+	    fontMenu.add(serifItem = new JRadioButtonMenuItem("Serif", false));
+	    serifItem.addActionListener(this);
+	    
+	    ButtonGroup types = new ButtonGroup();
+	    types.add(arialItem);
+	    types.add(helveticaItem);
+	    types.add(courierItem);
+	    types.add(serifItem);
+	    
+		fontMenu.addSeparator();
+		fontMenu.add(fontSizeItem);
 
 		// networkMenu
 		JMenu networkMenu = new JMenu("Network");
@@ -223,6 +246,7 @@ public class GUI implements ActionListener, DocumentListener
 		// add menus to menuBar
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
+		menuBar.add(fontMenu);
 		menuBar.add(networkMenu);
 		menuBar.add(helpMenu);
 
@@ -273,20 +297,20 @@ public class GUI implements ActionListener, DocumentListener
 			String fontsize = JOptionPane.showInputDialog("Change font size by entering a value below");
 			if (isInteger(fontsize))
 			{
-				int font_size = Integer.parseInt(fontsize);
-				if (font_size > 100)
+				FONT_SIZE = Integer.parseInt(fontsize);
+				if (FONT_SIZE > 100)
 				{
 					JOptionPane.showMessageDialog(frame, "Maximum font size is 100", "Size Error", JOptionPane.WARNING_MESSAGE);
 				}
 
-				else if (font_size < 8)
+				else if (FONT_SIZE < 8)
 				{
 					JOptionPane.showMessageDialog(frame, "Minimum font size is 8", "Size Error", JOptionPane.WARNING_MESSAGE);
 				}
 
 				else
 				{
-					Font font = new Font("Arial", 10, font_size);
+					Font font = new Font(STYLE, 10, FONT_SIZE);
 					textPane.setFont(font);
 				}
 			}
@@ -328,9 +352,14 @@ public class GUI implements ActionListener, DocumentListener
 	 */
 	public void aboutFrame()
 	{
-		String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with HTML, JAVA, and TXT documents." + "\n";
-
+		String text="<html><b>Filer is an application that was designed, using Java, to help users"
+			    +"\n<html><b>create documents, read them and save them locally or across a network."
+			    +"\n<html><b> Filer is currently compatible with JAVA and TXT documents."
+			    + "\n<html><b>This application was created by:"
+			    + "<ul><li>Daniel Stout</li> <li>Nick Brooks</li> <li>Andy Kenny</li> <li>George Faraj</li> <li>George Sousa</li></ul></html></b>";
+		
 		JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
+
 	}
 
 	/**
@@ -338,7 +367,53 @@ public class GUI implements ActionListener, DocumentListener
 	 */
 	public void assistFrame()
 	{
-		JOptionPane.showMessageDialog(frame, "How to use filer", "How to use Filer", JOptionPane.PLAIN_MESSAGE);
+		Object[] options = { //This array contains the options for the Option Dialog
+                "Changing Font",
+                "Saving Across a Network",
+                "Saving and Opening Files",
+                "Exiting Filer",
+                "None"
+                };
+		
+		String text = "Which function of Filer would like to know more about";
+		
+		String s = (String)JOptionPane.showInputDialog(frame,text,"How To",JOptionPane.PLAIN_MESSAGE,null,options,"None");
+		
+		String savText = 
+				"Filer provides a simple and easy way to save and open files. All the options"
+				+ "\n are in the 'File' option of the menu bar located at the top of the screen. Next"
+				+ "\n to each of the options is a combination of keys that can function as a shortcut for you."
+				+ "\n Once either Open or Save is selected a pop-up menu will appear and all you have to do is "
+				+ "\n select the appropriate location for the file to be either stored or opened.";
+		
+		String fonText = "To change either the size of the font or the style of the font first locate the 'Font' option"
+				+ "\n on the main menu bar. The current font of the document will be indicated by a check mark, to change"
+				+ "\n the font style simply click on an option and the font of the document will be set to the style of "
+				+ "\n your choice. To change the size of the font simply go to the 'Font' option of the main menu bar and"
+				+ "\n select the 'Font Size' option. A menu will pop-up and ask for a new font size, once entered click"
+				+ "\n 'OK' and the font size will have been set to that value (the font can be set to any value from 8-100).";
+		
+        String netwText = "One of Filers main applications is the ability to save files onto the network. Before attempting"
+        		+ "\n to send a file, make sure that it is saved. Once your file is saved simply locate the 'Network' option"
+        		+ "\n in the menu bar and select Send File. To retrive a file simply return to the 'Network' option and select"
+        		+ "\n Get File to find your file of choice and open it on Filer";
+        
+        String exiText = "To exit Filer you can either select click on the X on the top right of the Filer screen or you can"
+        		+ "\n select Exit in the 'File' option of the main menu bar. Before exiting if you have any unsaved work Filer"
+        		+ "\n will create a pop-up window asking you to save your data.";
+        
+		if(s.equals("Saving and Opening Files")){
+			JOptionPane.showMessageDialog(frame, savText, "How to Save and Open Files", JOptionPane.PLAIN_MESSAGE);
+		}
+		else if(s.equals("Changing Font")){
+			JOptionPane.showMessageDialog(frame, fonText, "How to Change Font", JOptionPane.PLAIN_MESSAGE);
+		}
+		else if(s.equals("Saving Across a Network")){
+			JOptionPane.showMessageDialog(frame, netwText, "How to Use the Network Function", JOptionPane.PLAIN_MESSAGE);
+		}
+		else if(s.equals("Exiting Filer")){
+			JOptionPane.showMessageDialog(frame, exiText, "How to Exit Filer", JOptionPane.PLAIN_MESSAGE);
+		}
 	}
 
 	/**
@@ -471,6 +546,30 @@ public class GUI implements ActionListener, DocumentListener
 		else if (e.getSource() == redoItem)
 		{
 			if (undoManager.canRedo()) undoManager.redo();
+		}
+		else if (e.getSource() == arialItem)
+		{
+			STYLE = "Arial";
+			Font font = new Font(STYLE, 10, FONT_SIZE);
+			textPane.setFont(font);
+		}
+		else if (e.getSource() == helveticaItem)
+		{
+			STYLE = "Helvetica Bold";
+			Font font = new Font(STYLE, 10, FONT_SIZE);
+			textPane.setFont(font);
+		}
+		else if (e.getSource() == courierItem)
+		{
+			STYLE = "Courier";
+			Font font = new Font(STYLE, 10, FONT_SIZE);
+			textPane.setFont(font);
+		}
+		else if (e.getSource() == serifItem)
+		{
+			STYLE = "Serif";
+			Font font = new Font(STYLE, 10, FONT_SIZE);
+			textPane.setFont(font);
 		}
 		else if (e.getSource() == autoSaveItem)
 		{
