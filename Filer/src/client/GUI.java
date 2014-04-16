@@ -47,7 +47,7 @@ import javax.swing.undo.UndoManager;
  * @author Nick Brooks
  * @author George Faraj
  * @author Andy Kenney
- * @author George Sousa
+ * @author Peter Sousa
  * @author Daniel Stout
  * 
  * @version 2014/Apr/1
@@ -57,7 +57,7 @@ public class GUI implements ActionListener, DocumentListener
 {
 	// declarations
 	JFrame frame, aboutFrame, assistFrame, fontSizeFrame;
-	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem,fontSizeItem,arialItem,courierItem,helveticaItem,serifItem;
+	JMenuItem newItem, openItem, saveItem, saveAsItem, undoItem, redoItem, aboutItem, sendFileItem, getFileItem, exitItem, assistItem, fontSizeItem, arialItem, courierItem, helveticaItem, serifItem;
 	JCheckBoxMenuItem autoSaveItem;
 	JTextPane textPane;
 	JFileChooser fileChooser;
@@ -193,28 +193,28 @@ public class GUI implements ActionListener, DocumentListener
 
 		editMenu.add(undoItem);
 		editMenu.add(redoItem);
-		
+
 		// fontMenu
 		JMenu fontMenu = new JMenu("Font");
-		
+
 		fontSizeItem = new JMenuItem("Font Size");
 		fontSizeItem.addActionListener(this);
-		
+
 		fontMenu.add(arialItem = new JRadioButtonMenuItem("Arial", true));
 		arialItem.addActionListener(this);
-	    fontMenu.add(helveticaItem = new JRadioButtonMenuItem("Helvetica", false));
-	    helveticaItem.addActionListener(this);
-	    fontMenu.add(courierItem = new JRadioButtonMenuItem("Courier", false));
-	    courierItem.addActionListener(this);
-	    fontMenu.add(serifItem = new JRadioButtonMenuItem("Serif", false));
-	    serifItem.addActionListener(this);
-	    
-	    ButtonGroup types = new ButtonGroup();
-	    types.add(arialItem);
-	    types.add(helveticaItem);
-	    types.add(courierItem);
-	    types.add(serifItem);
-	    
+		fontMenu.add(helveticaItem = new JRadioButtonMenuItem("Helvetica", false));
+		helveticaItem.addActionListener(this);
+		fontMenu.add(courierItem = new JRadioButtonMenuItem("Courier", false));
+		courierItem.addActionListener(this);
+		fontMenu.add(serifItem = new JRadioButtonMenuItem("Serif", false));
+		serifItem.addActionListener(this);
+
+		ButtonGroup types = new ButtonGroup();
+		types.add(arialItem);
+		types.add(helveticaItem);
+		types.add(courierItem);
+		types.add(serifItem);
+
 		fontMenu.addSeparator();
 		fontMenu.add(fontSizeItem);
 
@@ -352,67 +352,50 @@ public class GUI implements ActionListener, DocumentListener
 	 */
 	public void aboutFrame()
 	{
-		String text="<html><b>Filer is an application that was designed, using Java, to help users"
-			    +"\n<html><b>create documents, read them and save them locally or across a network."
-			    +"\n<html><b> Filer is currently compatible with JAVA and TXT documents."
-			    + "\n<html><b>This application was created by:"
-			    + "<ul><li>Daniel Stout</li> <li>Nick Brooks</li> <li>Andy Kenny</li> <li>George Faraj</li> <li>George Sousa</li></ul></html></b>";
-		
+		String text = "<html><b>Filer is an application that was designed, using Java, to help users" + "\n<html><b>create documents, read them and save them locally or across a network." + "\n<html><b> Filer is currently compatible with JAVA and TXT documents." + "\n<html><b>This application was created by:" + "<ul><li>Daniel Stout</li> <li>Nick Brooks</li> <li>Andy Kenny</li> <li>George Faraj</li> <li>Peter Sousa</li></ul></html></b>";
+
 		JOptionPane.showMessageDialog(frame, text, "What is Filer?", JOptionPane.PLAIN_MESSAGE);
 
 	}
 
-	/**
+	/** 
 	 * Creates a JFrame containing information regarding the usage of the program
 	 */
 	public void assistFrame()
 	{
-		Object[] options = { //This array contains the options for the Option Dialog
-                "Changing Font",
-                "Saving Across a Network",
-                "Saving and Opening Files",
-                "Exiting Filer",
-                "None"
-                };
-		
+		Object[] options = { // This array contains the options for the Option Dialog
+		"Changing Font", "Saving Across a Network", "Saving and Opening Files", "Exiting Filer", "None"};
+
 		String text = "Which function of Filer would like to know more about";
-		
-		String s = (String)JOptionPane.showInputDialog(frame,text,"How To",JOptionPane.PLAIN_MESSAGE,null,options,"None");
-		
-		String savText = 
-				"Filer provides a simple and easy way to save and open files. All the options"
-				+ "\n are in the 'File' option of the menu bar located at the top of the screen. Next"
-				+ "\n to each of the options is a combination of keys that can function as a shortcut for you."
-				+ "\n Once either Open or Save is selected a pop-up menu will appear and all you have to do is "
-				+ "\n select the appropriate location for the file to be either stored or opened.";
-		
-		String fonText = "To change either the size of the font or the style of the font first locate the 'Font' option"
-				+ "\n on the main menu bar. The current font of the document will be indicated by a check mark, to change"
-				+ "\n the font style simply click on an option and the font of the document will be set to the style of "
-				+ "\n your choice. To change the size of the font simply go to the 'Font' option of the main menu bar and"
-				+ "\n select the 'Font Size' option. A menu will pop-up and ask for a new font size, once entered click"
-				+ "\n 'OK' and the font size will have been set to that value (the font can be set to any value from 8-100).";
-		
-        String netwText = "One of Filers main applications is the ability to save files onto the network. Before attempting"
-        		+ "\n to send a file, make sure that it is saved. Once your file is saved simply locate the 'Network' option"
-        		+ "\n in the menu bar and select Send File. To retrive a file simply return to the 'Network' option and select"
-        		+ "\n Get File to find your file of choice and open it on Filer";
-        
-        String exiText = "To exit Filer you can either select click on the X on the top right of the Filer screen or you can"
-        		+ "\n select Exit in the 'File' option of the main menu bar. Before exiting if you have any unsaved work Filer"
-        		+ "\n will create a pop-up window asking you to save your data.";
-        
-		if(s.equals("Saving and Opening Files")){
-			JOptionPane.showMessageDialog(frame, savText, "How to Save and Open Files", JOptionPane.PLAIN_MESSAGE);
-		}
-		else if(s.equals("Changing Font")){
-			JOptionPane.showMessageDialog(frame, fonText, "How to Change Font", JOptionPane.PLAIN_MESSAGE);
-		}
-		else if(s.equals("Saving Across a Network")){
-			JOptionPane.showMessageDialog(frame, netwText, "How to Use the Network Function", JOptionPane.PLAIN_MESSAGE);
-		}
-		else if(s.equals("Exiting Filer")){
-			JOptionPane.showMessageDialog(frame, exiText, "How to Exit Filer", JOptionPane.PLAIN_MESSAGE);
+
+		String s = (String) JOptionPane.showInputDialog(frame, text, "How To", JOptionPane.PLAIN_MESSAGE, null, options, "None");
+
+		String savText = "Filer provides a simple and easy way to save and open files. All the options" + "\n are in the 'File' option of the menu bar located at the top of the screen. Next" + "\n to each of the options is a combination of keys that can function as a shortcut for you." + "\n Once either Open or Save is selected a pop-up menu will appear and all you have to do is " + "\n select the appropriate location for the file to be either stored or opened.";
+
+		String fonText = "To change either the size of the font or the style of the font first locate the 'Font' option" + "\n on the main menu bar. The current font of the document will be indicated by a check mark, to change" + "\n the font style simply click on an option and the font of the document will be set to the style of " + "\n your choice. To change the size of the font simply go to the 'Font' option of the main menu bar and" + "\n select the 'Font Size' option. A menu will pop-up and ask for a new font size, once entered click" + "\n 'OK' and the font size will have been set to that value (the font can be set to any value from 8-100).";
+
+		String netwText = "One of Filers main applications is the ability to save files onto the network. Before attempting" + "\n to send a file, make sure that it is saved. Once your file is saved simply locate the 'Network' option" + "\n in the menu bar and select Send File. To retrive a file simply return to the 'Network' option and select" + "\n Get File to find your file of choice and open it on Filer";
+
+		String exiText = "To exit Filer you can either select click on the X on the top right of the Filer screen or you can" + "\n select Exit in the 'File' option of the main menu bar. Before exiting if you have any unsaved work Filer" + "\n will create a pop-up window asking you to save your data.";
+
+		if (s != null)
+		{
+			if (s.equals("Saving and Opening Files"))
+			{
+				JOptionPane.showMessageDialog(frame, savText, "How to Save and Open Files", JOptionPane.PLAIN_MESSAGE);
+			}
+			else if (s.equals("Changing Font"))
+			{
+				JOptionPane.showMessageDialog(frame, fonText, "How to Change Font", JOptionPane.PLAIN_MESSAGE);
+			}
+			else if (s.equals("Saving Across a Network"))
+			{
+				JOptionPane.showMessageDialog(frame, netwText, "How to Use the Network Function", JOptionPane.PLAIN_MESSAGE);
+			}
+			else if (s.equals("Exiting Filer"))
+			{
+				JOptionPane.showMessageDialog(frame, exiText, "How to Exit Filer", JOptionPane.PLAIN_MESSAGE);
+			}
 		}
 	}
 
@@ -670,6 +653,7 @@ public class GUI implements ActionListener, DocumentListener
 	public void setTextPaneContents(String s)
 	{
 		textPane.setText(s);
+		currentFile = null;
 		isSaved = false;
 		updateCountLabels();
 	}
